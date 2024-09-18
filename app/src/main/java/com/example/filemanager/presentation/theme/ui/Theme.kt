@@ -1,6 +1,5 @@
-package com.example.filemanager.ui.theme
+package com.example.filemanager.presentation.theme.ui
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

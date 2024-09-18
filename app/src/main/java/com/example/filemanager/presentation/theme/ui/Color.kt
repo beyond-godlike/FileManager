@@ -1,4 +1,4 @@
-package com.example.filemanager.ui.theme
+package com.example.filemanager.presentation.theme.ui
 
 import androidx.compose.ui.graphics.Color
 
