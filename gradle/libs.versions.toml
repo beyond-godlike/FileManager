@@ -1,5 +1,7 @@
 [versions]
+accompanistPermissions = "0.36.0"
 agp = "8.4.2"
+hilt = "2.48"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -8,20 +10,28 @@ espressoCore = "3.6.1"
 composeBom = "2023.08.00"
 concurrentFutures = "1.2.0"
 kotlinxCoroutinesAndroid = "1.8.0"
-kspVersion = "1.8.10-1.0.9"
+kspVersion = "1.9.0-1.0.12"
 landscapistGlide = "1.3.7"
 lifecycleRuntimeKtx = "2.8.4"
 activityCompose = "1.9.0"
 lifecycleViewmodelKtx = "2.8.4"
 material3Android = "1.2.1"
 navigationComposeVersion = "2.7.2"
+hiltNavigation = "1.2.0"
 
 [libraries]
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 androidx-concurrent-futures = { module = "androidx.concurrent:concurrent-futures", version.ref = "concurrentFutures" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+
+hilt = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
+hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigation" }
+
+
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -44,6 +54,7 @@ navigation-compose = { module = "androidx.navigation:navigation-compose", versio
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 google-ksp = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }
+hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 
 
 
