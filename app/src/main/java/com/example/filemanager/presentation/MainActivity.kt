@@ -25,7 +25,9 @@ import com.example.filemanager.presentation.home.HomeScreen
 import com.example.filemanager.presentation.theme.ui.FileManagerTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 @OptIn(ExperimentalPermissionsApi::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,39 +81,21 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun getListAccordingToVersion(): List<String> {
-    var list: List<String> = listOf()
-
     //Android is 13 (R) or above
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        list = listOf(
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        listOf(
             Manifest.permission.READ_MEDIA_IMAGES,
             Manifest.permission.READ_MEDIA_VIDEO,
             Manifest.permission.READ_MEDIA_AUDIO
         )
     }
-    // Android 12: Build.VERSION_CODES.S (API level 31)
-    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.S) {
-        list = listOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.ACCESS_MEDIA_LOCATION,
-        )
-    }
     //Android 11: Build.VERSION_CODES.R (API level 30)
-    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.R) {
-        list = listOf(
+    else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+        listOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
         )
     }
-    //Android 10: Build.VERSION_CODES.Q (API level 29) or lower
-    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-        list = listOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
-    }
-
-    return list
+    else listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 }
 
 @Composable

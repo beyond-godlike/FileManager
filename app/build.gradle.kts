@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.ksp)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
@@ -67,6 +68,11 @@ dependencies {
     implementation(libs.androidx.concurrent.futures)
     implementation(libs.landscapist.glide)
     implementation(libs.accompanist.permissions)
+
+    implementation(libs.hilt)
+    implementation(libs.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
