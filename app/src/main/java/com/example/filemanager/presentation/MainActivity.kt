@@ -61,8 +61,9 @@ class MainActivity : ComponentActivity() {
                 when {
                     permissionsState.allPermissionsGranted -> {
                         Box(modifier = Modifier.padding(26.dp)) {
+                            // нахуя ты хоум скрин вызвал
+                            // ты сломал навигацию уебок
                             Navigation(navController = navController)
-                            HomeScreen(navController)
                         }
                     }
 

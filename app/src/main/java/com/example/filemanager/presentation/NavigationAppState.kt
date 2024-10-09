@@ -22,7 +22,7 @@ fun Navigation(navController: NavHostController) {
             HomeScreen(navController = navController)
         }
         composable(route = Screen.ImagesScreen.route) {
-            ImagesScreen()
+            ImagesScreen(navController = navController)
         }
         composable(route = Screen.VideosScreen.route) {
             VideosScreen()

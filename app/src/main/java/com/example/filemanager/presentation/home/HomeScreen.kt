@@ -48,14 +48,18 @@ import android.net.Uri
 import android.os.Build
 import android.util.Size
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -63,15 +67,12 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
-import com.example.filemanager.R
 import com.example.filemanager.data.ImageItem
 import androidx.hilt.navigation.compose.hiltViewModel
 
@@ -87,17 +88,22 @@ fun HomeScreen(navController: NavController) {
         viewModel.dispatch(HomeIntent.LoadImages, context)
     }
 
-    ReadyHomeScreen(imageItemsState.value.images, navController)
+    ReadyHomeScreen(imageItemsState.value.images, navController, viewModel)
 }
 
+@Suppress("UNUSED_EXPRESSION")
 @Composable
-fun ReadyHomeScreen(images: List<ImageItem>, navController: NavController) {
+fun ReadyHomeScreen(
+    images: List<ImageItem>,
+    navController: NavController,
+    viewModel: HomeViewModel
+) {
     val items = listOf(
         NavigationItem(
             title = "Очистка",
             selectedIcon = Icons.Filled.Home,
             unselectedIcon = Icons.Outlined.Home,
-            route = Screen.StorageScreen.route
+            route = Screen.ImagesScreen.route
         ),
         NavigationItem(
             title = "Корзина",
@@ -170,35 +176,60 @@ fun ReadyHomeScreen(images: List<ImageItem>, navController: NavController) {
             },
             drawerState = drawerState
         ) {
-            var query = remember { mutableStateOf("") }
+            //Collecting states from ViewModel
+            val searchText by viewModel.searchText.collectAsState()
+            val isSearching by viewModel.isSearching.collectAsState()
+
             Scaffold(
                 topBar = {
                     TopAppBar(
                         title = {
                             SearchBar(
                                 leadingIcon = {
-                                    IconButton(onClick = {
-                                        scope.launch {
-                                            drawerState.open()
-                                        }
-                                    }) {
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch {
+                                                drawerState.open()
+                                            }
+                                        },
+                                        modifier = Modifier.size(24.dp)
+                                    ) {
                                         Icon(
                                             imageVector = Icons.Default.Menu,
                                             contentDescription = "Menu"
                                         )
                                     }
                                 },
-                                query = query.value,
-                                onQueryChange = { query.value = it },
-                                onSearch = {},
-                                active = false,
-                                onActiveChange = {},
-                            ) {
-                                Text("Searching for: $query")
-                            }
+                                trailingIcon = {
+                                    IconButton(
+                                        onClick = { /*TODO*/ },
+                                        modifier = Modifier.size(24.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Search,
+                                            contentDescription = "Search"
+                                        )
+                                    }
+                                },
+                                query = searchText,
+                                onQueryChange = { viewModel::onSearchTextChange },
+                                onSearch = {/*viewModel::onSearchTextChange*/ },
+                                active = isSearching,
+                                placeholder = {
+                                    Text(
+                                        "Searching for: ${searchText}",
+                                        fontSize = 14.sp
+                                    )
+                                },
+                                onActiveChange = { viewModel.onToogleSearch() },
+                                content = {
+                                    Text("${searchText}", fontSize = 14.sp)
+                                }
+                            )
                         }
                     )
                 }
+
             ) {
                 MainScreen(navController = navController, paddings = it, images)
             }
@@ -243,7 +274,8 @@ fun ImageRounded(imageItem: Bitmap) {
         contentDescription = "Image",
         modifier = Modifier
             .width(100.dp)
-            .height(150.dp).clip(RoundedCornerShape(16.dp)),
+            .height(150.dp)
+            .clip(RoundedCornerShape(16.dp)),
         contentScale = ContentScale.Crop
     )
 }
@@ -258,52 +290,82 @@ fun MainScreen(navController: NavController, paddings: PaddingValues, images: Li
             bottom = paddings.calculateBottomPadding()
         )
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp)
+        ) {
+            Text(
+                text = "Недавние",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.CenterStart)
+            )
+            Text(
+                text = "Показать все",
+                fontSize = 14.sp,
+                color = Color.Blue,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .clickable {
+                        // Handle the click event here
+                    }
+                    .align(Alignment.CenterEnd)
+            )
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             Spacer(modifier = Modifier.height(16.dp))
             RowImages(images)
         }
         // да, так и должно быть. там будет куча подразделов а эта хуета (возможно) сеткой
-        Spacer(modifier = Modifier.height(16.dp))
-        ImageWithText(
-            painterResource(R.drawable.image_24),
-            title = "Images",
-            description = "",
-            onClick = {
-                navController.navigate(Screen.ImagesScreen.route)
+
+        Text(
+            text = "Категории",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 24.dp)
+        )
+
+        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            items(categories.chunked(2)) { row ->
+                LazyRow {
+                    items(row) { item ->
+                        ImageWithText(
+                            painterResource(item.icon),
+                            title = item.title,
+                            description = item.description,
+                            modifier = Modifier.padding(16.dp),
+                            onClick = { item.route?.let { navController.navigate(it) } }
+                        )
+                    }
+                }
             }
+        }
+
+        // todo подборки
+        Text(
+            text = "Все хранилище",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 24.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-        ImageWithText(
-            painterResource(id = R.drawable.video_24),
-            title = "Video", description = "",
-            onClick = {
-                navController.navigate(Screen.VideosScreen.route)
+        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            items(storageCategories.chunked(2)) { row ->
+                LazyRow {
+                    items(row) { item ->
+                        ImageWithText(
+                            painterResource(item.icon),
+                            title = item.title,
+                            description = item.description,
+                            modifier = Modifier.padding(16.dp),
+                            onClick = { navController.navigate(item.route) }
+                        )
+                    }
+                }
             }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-        ImageWithText(
-            painterResource(id = R.drawable.audio_24),
-            title = "Audio", description = "0 mb",
-            onClick = {
-            }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-        ImageWithText(
-            painterResource(id = R.drawable.storage_24), title = "Storage",
-            description = "", onClick = {
-                navController.navigate(Screen.StorageScreen.route)
-            }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        ImageWithText(
-            painterResource(id = R.drawable.sd_storage_24), title = "SD card", description = "0 mb",
-            onClick = {}
-        )
-
-
+        }
     }
 }
 
@@ -322,14 +384,14 @@ fun ImageWithText(
             image,
             contentDescription = "Image",
             modifier = Modifier
-                .size(width = 40.dp, height = 40.dp)
+                .size(width = 24.dp, height = 24.dp)
                 .align(Alignment.CenterVertically),
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(
                 text = title,
-                fontSize = 20.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
