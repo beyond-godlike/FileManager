@@ -217,13 +217,13 @@ fun ReadyHomeScreen(
                                 active = isSearching,
                                 placeholder = {
                                     Text(
-                                        "Searching for: ${searchText}",
+                                        "Searching for: $searchText",
                                         fontSize = 14.sp
                                     )
                                 },
                                 onActiveChange = { viewModel.onToogleSearch() },
                                 content = {
-                                    Text("${searchText}", fontSize = 14.sp)
+                                    Text(searchText, fontSize = 14.sp)
                                 }
                             )
                         }
@@ -336,7 +336,7 @@ fun MainScreen(navController: NavController, paddings: PaddingValues, images: Li
                             title = item.title,
                             description = item.description,
                             modifier = Modifier.padding(16.dp),
-                            onClick = { item.route?.let { navController.navigate(it) } }
+                            onClick = { item.route.let { navController.navigate(it) } }
                         )
                     }
                 }
