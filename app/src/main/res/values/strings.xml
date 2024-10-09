@@ -1,3 +1,15 @@
 <resources>
-    <string name="app_name">FileManager</string>
+    <string name="app_name" translatable="false">FileManager</string>
+    <string name="categories">Categories</string>
+    <string name="recent">Recent</string>
+    <string name="show_all">Show all</string>
+    <string name="downloads">Downloads</string>
+    <string name="images">Images</string>
+    <string name="video">Video</string>
+    <string name="audio">Audio</string>
+    <string name="documents">Documents</string>
+    <string name="applications">Applications</string>
+    <string name="storage">Storage</string>
+    <string name="sd_card">SD Card</string>
+    <string name="all_storage">All storage</string>
 </resources>

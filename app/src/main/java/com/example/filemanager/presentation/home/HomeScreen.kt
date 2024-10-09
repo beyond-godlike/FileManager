@@ -48,14 +48,17 @@ import android.net.Uri
 import android.os.Build
 import android.util.Size
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Menu
@@ -68,13 +71,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import com.example.filemanager.data.ImageItem
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.filemanager.R
+import com.example.filemanager.presentation.theme.ui.Dimens
+import com.example.filemanager.presentation.theme.ui.ImageSize
+import com.example.filemanager.presentation.theme.ui.Typography
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -176,7 +183,6 @@ fun ReadyHomeScreen(
             },
             drawerState = drawerState
         ) {
-            //Collecting states from ViewModel
             val searchText by viewModel.searchText.collectAsState()
             val isSearching by viewModel.isSearching.collectAsState()
 
@@ -293,20 +299,20 @@ fun MainScreen(navController: NavController, paddings: PaddingValues, images: Li
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 24.dp)
+                .padding(top = Dimens.largePadding)
         ) {
             Text(
-                text = "Недавние",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
+                text = stringResource(R.string.recent),
+                style = Typography.labelMedium,
                 modifier = Modifier.align(Alignment.CenterStart)
             )
             Text(
-                text = "Показать все",
-                fontSize = 14.sp,
-                color = Color.Blue,
+                text = stringResource(R.string.show_all),
+                style = Typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
                     .clickable {
                         // Handle the click event here
                     }
@@ -318,53 +324,41 @@ fun MainScreen(navController: NavController, paddings: PaddingValues, images: Li
             Spacer(modifier = Modifier.height(16.dp))
             RowImages(images)
         }
-        // да, так и должно быть. там будет куча подразделов а эта хуета (возможно) сеткой
 
         Text(
-            text = "Категории",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 24.dp)
+            text = stringResource(R.string.categories),
+            style = Typography.labelMedium,
+            modifier = Modifier.padding(top = Dimens.largePadding, bottom = Dimens.defaultPadding)
         )
 
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(categories.chunked(2)) { row ->
-                LazyRow {
-                    items(row) { item ->
-                        ImageWithText(
-                            painterResource(item.icon),
-                            title = item.title,
-                            description = item.description,
-                            modifier = Modifier.padding(16.dp),
-                            onClick = { item.route.let { navController.navigate(it) } }
-                        )
-                    }
-                }
-            }
-        }
+        CategoriesGrid(categories, navController)
 
         // todo подборки
         Text(
-            text = "Все хранилище",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 24.dp)
+            text = stringResource(R.string.all_storage),
+            style = Typography.labelMedium,
+            modifier = Modifier.padding(top = Dimens.largePadding, bottom = Dimens.defaultPadding)
         )
+        CategoriesGrid(storageCategories, navController)
+    }
+}
 
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(storageCategories.chunked(2)) { row ->
-                LazyRow {
-                    items(row) { item ->
-                        ImageWithText(
-                            painterResource(item.icon),
-                            title = item.title,
-                            description = item.description,
-                            modifier = Modifier.padding(16.dp),
-                            onClick = { navController.navigate(item.route) }
-                        )
-                    }
-                }
-            }
+@Composable
+fun CategoriesGrid(categories: List<CategoryItem>, navController: NavController){
+    val context = LocalContext.current
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(Dimens.smallPadding),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ){
+        items(categories) { item ->
+            ImageWithText(
+                painterResource(item.icon),
+                title = context.getString(item.title),
+                description = item.description,
+                onClick = { item.route.let { navController.navigate(it) } }
+            )
         }
     }
 }
@@ -384,19 +378,19 @@ fun ImageWithText(
             image,
             contentDescription = "Image",
             modifier = Modifier
-                .size(width = 24.dp, height = 24.dp)
+                .size(ImageSize.imageSizeSmall)
                 .align(Alignment.CenterVertically),
+            tint = MaterialTheme.colorScheme.primary
         )
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(Dimens.defaultPadding))
         Column {
             Text(
                 text = title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+                style = Typography.labelSmall
             )
             Text(
                 text = description,
-                fontSize = 14.sp
+                fontSize = 11.sp
             )
         }
     }

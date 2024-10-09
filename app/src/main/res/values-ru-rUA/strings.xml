@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FileManager</string>
+    <string name="categories">Категории</string>
+    <string name="recent">Недавние</string>
+    <string name="show_all">Показать все</string>
+    <string name="downloads">Загрузки</string>
+    <string name="images">Изображения</string>
+    <string name="video">Видео</string>
+    <string name="audio">Аудио</string>
+    <string name="documents">Документы</string>
+    <string name="applications">Приложения</string>
+    <string name="storage">Внутренняя память</string>
+    <string name="sd_card">SD-карта</string>
+    <string name="all_storage">Все хранилище</string>
+</resources>
