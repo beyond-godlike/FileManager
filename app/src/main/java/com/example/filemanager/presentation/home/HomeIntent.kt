@@ -1,7 +1,7 @@
 package com.example.filemanager.presentation.home
 
-import com.example.filemanager.data.ImageItem
+import com.example.filemanager.presentation.base.Intent
 
-sealed class HomeIntent {
+sealed class HomeIntent : Intent {
     object LoadImages : HomeIntent()
 }

@@ -8,12 +8,14 @@ import com.example.filemanager.presentation.home.HomeScreen
 import com.example.filemanager.presentation.images.ImagesScreen
 import com.example.filemanager.presentation.storage.StorageScreen
 import com.example.filemanager.presentation.videos.VideosScreen
+import com.example.filemanager.presentation.search.SearchScreen
 
 sealed class Screen(val route: String) {
     object HomeScreen : Screen("home")
     object ImagesScreen : Screen("images")
     object VideosScreen : Screen("videos")
     object StorageScreen : Screen("storage")
+    object SearchScreen : Screen("search")
 }
 @Composable
 fun Navigation(navController: NavHostController) {
@@ -29,6 +31,9 @@ fun Navigation(navController: NavHostController) {
         }
         composable(route = Screen.StorageScreen.route) {
             StorageScreen()
+        }
+        composable(route = Screen.SearchScreen.route) {
+            SearchScreen(navController = navController)
         }
     }
 }

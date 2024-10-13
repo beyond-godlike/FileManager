@@ -63,6 +63,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -98,7 +101,6 @@ fun HomeScreen(navController: NavController) {
     ReadyHomeScreen(imageItemsState.value.images, navController, viewModel)
 }
 
-@Suppress("UNUSED_EXPRESSION")
 @Composable
 fun ReadyHomeScreen(
     images: List<ImageItem>,
@@ -107,27 +109,27 @@ fun ReadyHomeScreen(
 ) {
     val items = listOf(
         NavigationItem(
-            title = "Очистка",
+            title = stringResource(R.string.clean),
             selectedIcon = Icons.Filled.Home,
-            unselectedIcon = Icons.Outlined.Home,
+            unselectedIcon = Icons.Outlined.Star,
             route = Screen.ImagesScreen.route
         ),
         NavigationItem(
-            title = "Корзина",
+            title = stringResource(R.string.trash),
+            selectedIcon = Icons.Filled.Settings,
+            unselectedIcon = Icons.Outlined.Delete,
+            route = Screen.HomeScreen.route
+        ),
+        NavigationItem(
+            title = stringResource(R.string.settings),
             selectedIcon = Icons.Filled.Settings,
             unselectedIcon = Icons.Outlined.Settings,
             route = Screen.HomeScreen.route
         ),
         NavigationItem(
-            title = "Настройки",
+            title = stringResource(R.string.help),
             selectedIcon = Icons.Filled.Settings,
-            unselectedIcon = Icons.Outlined.Settings,
-            route = Screen.HomeScreen.route
-        ),
-        NavigationItem(
-            title = "Справка/Отзыв",
-            selectedIcon = Icons.Filled.Settings,
-            unselectedIcon = Icons.Outlined.Settings,
+            unselectedIcon = Icons.Outlined.Info,
             route = Screen.HomeScreen.route
         )
     )
@@ -183,9 +185,6 @@ fun ReadyHomeScreen(
             },
             drawerState = drawerState
         ) {
-            val searchText by viewModel.searchText.collectAsState()
-            val isSearching by viewModel.isSearching.collectAsState()
-
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -208,7 +207,7 @@ fun ReadyHomeScreen(
                                 },
                                 trailingIcon = {
                                     IconButton(
-                                        onClick = { /*TODO*/ },
+                                        onClick = { navController.navigate(Screen.SearchScreen.route) },
                                         modifier = Modifier.size(24.dp)
                                     ) {
                                         Icon(
@@ -217,19 +216,13 @@ fun ReadyHomeScreen(
                                         )
                                     }
                                 },
-                                query = searchText,
-                                onQueryChange = { viewModel::onSearchTextChange },
-                                onSearch = {/*viewModel::onSearchTextChange*/ },
-                                active = isSearching,
-                                placeholder = {
-                                    Text(
-                                        "Searching for: $searchText",
-                                        fontSize = 14.sp
-                                    )
-                                },
-                                onActiveChange = { viewModel.onToogleSearch() },
+                                query = "",
+                                onQueryChange = { navController.navigate(Screen.SearchScreen.route) },
+                                onSearch = { },
+                                active = false,
+                                onActiveChange = { navController.navigate(Screen.SearchScreen.route) },
                                 content = {
-                                    Text(searchText, fontSize = 14.sp)
+                                    Text("Searching for:", fontSize = 14.sp)
                                 }
                             )
                         }

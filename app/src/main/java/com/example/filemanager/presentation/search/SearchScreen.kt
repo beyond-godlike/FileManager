@@ -1,0 +1,152 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
+package com.example.filemanager.presentation.search
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.example.filemanager.R
+import com.example.filemanager.presentation.Screen
+import com.example.filemanager.presentation.home.loadThumbnail
+import com.example.filemanager.presentation.images.ImageItemsState
+import com.example.filemanager.presentation.theme.ui.Dimens
+import com.example.filemanager.presentation.theme.ui.ImageSize.imageSizeMedium
+import com.example.filemanager.presentation.theme.ui.Typography
+import com.skydoves.landscapist.glide.GlideImage
+
+@Composable
+fun SearchScreen(navController: NavController) {
+    val viewModel: SearchViewModel = hiltViewModel()
+    val imageItemsState = viewModel.imageItems.collectAsState()
+    val context = LocalContext.current
+
+    when (imageItemsState.value) {
+        is ImageItemsState.Error -> {
+            Text((imageItemsState.value as ImageItemsState.Error).e, Modifier.fillMaxWidth())
+        }
+
+        is ImageItemsState.Empty -> {
+            viewModel.dispatch(SearchIntent.LoadImages, context)
+        }
+
+        is ImageItemsState.Success -> {
+            MySearchScreen(viewModel, navController)
+        }
+
+    }
+}
+
+@Composable
+fun MySearchScreen(viewModel: SearchViewModel, navController: NavController) {
+    val searchText by viewModel.searchText.collectAsState()
+    val itemsList by viewModel.items.collectAsState()
+    val isSearching by viewModel.isSearching.collectAsState()
+
+    SearchBar(
+        leadingIcon = {
+            IconButton(
+                onClick = { navController.navigate(Screen.HomeScreen.route) },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+        },
+        trailingIcon = {
+            IconButton(
+                onClick = { },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search"
+                )
+            }
+        },
+        shape = SearchBarDefaults.inputFieldShape,
+        query = searchText,
+        onQueryChange = viewModel::onSearchTextChange,
+        onSearch = viewModel::onSearchTextChange,
+        active = isSearching,
+        onActiveChange = { viewModel.onToggleSearch() },
+        placeholder = { Text("Search") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Dimens.defaultPadding)),
+        colors = SearchBarDefaults.colors(
+            containerColor = Color.White
+        )
+
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            items(itemsList) { item ->
+
+                Row(modifier = Modifier.padding(Dimens.defaultPadding)) {
+                    IconRounded(
+                        loadThumbnail(item.contentUri, LocalContext.current)
+                            ?: painterResource(R.drawable.placeholder_image)
+                    )
+                    Column(modifier = Modifier.padding(start = Dimens.defaultPadding)) {
+                        Text(
+                            item.name,
+                            style = Typography.titleMedium,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                        Text(
+                            "",
+                            style = Typography.labelSmall
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun IconRounded(imageItem: Any) {
+    GlideImage(
+        imageModel = imageItem,
+        contentDescription = "Image",
+        modifier = Modifier
+            .width(imageSizeMedium)
+            .height(imageSizeMedium)
+            .clip(RoundedCornerShape(4.dp)),
+        contentScale = ContentScale.Crop
+    )
+}

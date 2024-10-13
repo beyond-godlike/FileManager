@@ -21,24 +21,9 @@ class HomeViewModel @Inject constructor(val repository: MediaRepository) : ViewM
     private val _state = MutableStateFlow(MediaState())
     val state: StateFlow<MediaState> = _state.asStateFlow()
 
-    //first state whether the search is happening or not
-    private val _isSearching = MutableStateFlow(false)
-    val isSearching = _isSearching.asStateFlow()
+    //private val _isSearching = MutableStateFlow(false)
+    //val isSearching = _isSearching.asStateFlow()
 
-    //second state the text typed by the user
-    private val _searchText = MutableStateFlow("")
-    val searchText = _searchText.asStateFlow()
-
-    fun onSearchTextChange(text: String) {
-        _searchText.value = text
-    }
-
-    fun onToogleSearch() {
-        _isSearching.value = !_isSearching.value
-        if (!_isSearching.value) {
-            onSearchTextChange("")
-        }
-    }
 
     fun dispatch(intent: HomeIntent, context: Context) {
         when (intent) {

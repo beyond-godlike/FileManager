@@ -13,4 +13,8 @@
     <string name="storage">Внутренняя память</string>
     <string name="sd_card">SD-карта</string>
     <string name="all_storage">Все хранилище</string>
+    <string name="settings">Настройки</string>
+    <string name="clean">Очистка</string>
+    <string name="trash">Корзина</string>
+    <string name="help">Справка / Отзыв</string>
 </resources>
