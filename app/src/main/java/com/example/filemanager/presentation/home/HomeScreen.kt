@@ -183,8 +183,7 @@ fun ReadyHomeScreen(
             },
             drawerState = drawerState
         ) {
-            val searchText by viewModel.searchText.collectAsState()
-            val isSearching by viewModel.isSearching.collectAsState()
+            //val isSearching by viewModel.isSearching.collectAsState()
 
             Scaffold(
                 topBar = {
@@ -208,7 +207,7 @@ fun ReadyHomeScreen(
                                 },
                                 trailingIcon = {
                                     IconButton(
-                                        onClick = { /*TODO*/ },
+                                        onClick = { navController.navigate(Screen.SearchScreen.route) },
                                         modifier = Modifier.size(24.dp)
                                     ) {
                                         Icon(
@@ -217,19 +216,19 @@ fun ReadyHomeScreen(
                                         )
                                     }
                                 },
-                                query = searchText,
-                                onQueryChange = { viewModel::onSearchTextChange },
-                                onSearch = {/*viewModel::onSearchTextChange*/ },
-                                active = isSearching,
+                                query = "searchText",
+                                onQueryChange = { navController.navigate(Screen.SearchScreen.route) },
+                                onSearch = { },
+                                active = false,
                                 placeholder = {
                                     Text(
-                                        "Searching for: $searchText",
+                                        "Searching for: ",
                                         fontSize = 14.sp
                                     )
                                 },
-                                onActiveChange = { viewModel.onToogleSearch() },
+                                onActiveChange = {  },
                                 content = {
-                                    Text(searchText, fontSize = 14.sp)
+                                    Text("Searching for:", fontSize = 14.sp)
                                 }
                             )
                         }
