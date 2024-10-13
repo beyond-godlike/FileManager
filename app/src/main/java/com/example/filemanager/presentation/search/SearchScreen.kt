@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,6 +51,7 @@ fun SearchScreen(navController: NavController) {
 
         is ImageItemsState.Success -> {
             MySearchScreen(viewModel, navController)
+
         }
 
     }
@@ -112,7 +112,7 @@ fun MySearchScreen(viewModel: SearchViewModel, navController: NavController) {
             ) {
                 items(itemsList) { item ->
                     Text(
-                        item,
+                        item.name,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = Dimens.defaultPadding)
