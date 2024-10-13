@@ -2,18 +2,19 @@
 
 package com.example.filemanager.presentation.search
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,18 +22,25 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.filemanager.R
 import com.example.filemanager.presentation.Screen
+import com.example.filemanager.presentation.home.loadThumbnail
 import com.example.filemanager.presentation.images.ImageItemsState
 import com.example.filemanager.presentation.theme.ui.Dimens
+import com.example.filemanager.presentation.theme.ui.ImageSize.imageSizeMedium
+import com.example.filemanager.presentation.theme.ui.Typography
+import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun SearchScreen(navController: NavController) {
@@ -42,7 +50,7 @@ fun SearchScreen(navController: NavController) {
 
     when (imageItemsState.value) {
         is ImageItemsState.Error -> {
-            Text("Error loading data")
+            Text((imageItemsState.value as ImageItemsState.Error).e, Modifier.fillMaxWidth())
         }
 
         is ImageItemsState.Empty -> {
@@ -51,7 +59,6 @@ fun SearchScreen(navController: NavController) {
 
         is ImageItemsState.Success -> {
             MySearchScreen(viewModel, navController)
-
         }
 
     }
@@ -91,34 +98,55 @@ fun MySearchScreen(viewModel: SearchViewModel, navController: NavController) {
         onQueryChange = viewModel::onSearchTextChange,
         onSearch = viewModel::onSearchTextChange,
         active = isSearching,
-        onActiveChange = { viewModel.onToogleSearch() },
+        onActiveChange = { viewModel.onToggleSearch() },
         placeholder = { Text("Search") },
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(Dimens.defaultPadding))
+            .clip(RoundedCornerShape(Dimens.defaultPadding)),
+        colors = SearchBarDefaults.colors(
+            containerColor = Color.White
+        )
 
     ) {
-        if (isSearching) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                items(itemsList) { item ->
-                    Text(
-                        item.name,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = Dimens.defaultPadding)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            items(itemsList) { item ->
+
+                Row(modifier = Modifier.padding(Dimens.defaultPadding)) {
+                    IconRounded(
+                        loadThumbnail(item.contentUri, LocalContext.current)
+                            ?: painterResource(R.drawable.placeholder_image)
                     )
+                    Column(modifier = Modifier.padding(start = Dimens.defaultPadding)) {
+                        Text(
+                            item.name,
+                            style = Typography.titleMedium,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                        Text(
+                            "",
+                            style = Typography.labelSmall
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+fun IconRounded(imageItem: Any) {
+    GlideImage(
+        imageModel = imageItem,
+        contentDescription = "Image",
+        modifier = Modifier
+            .width(imageSizeMedium)
+            .height(imageSizeMedium)
+            .clip(RoundedCornerShape(4.dp)),
+        contentScale = ContentScale.Crop
+    )
 }
