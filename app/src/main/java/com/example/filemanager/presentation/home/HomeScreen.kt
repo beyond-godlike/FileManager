@@ -92,8 +92,6 @@ fun HomeScreen(navController: NavController) {
     val imageItemsState = viewModel.state.collectAsState()
     val context = LocalContext.current
 
-    // Since key1 = Unit is used, the LaunchedEffect will not be retriggered
-    // when the composable recomposes due to configuration changes (e.g., screen rotation).
     LaunchedEffect(key1 = Unit) {
         viewModel.dispatch(HomeIntent.LoadImages, context)
     }
@@ -223,11 +221,13 @@ fun ReadyHomeScreen(
                                 onActiveChange = { navController.navigate(Screen.SearchScreen.route) },
                                 content = {
                                     Text("Searching for:", fontSize = 14.sp)
-                                }
+                                },
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                     )
-                }
+                },
+                modifier = Modifier.padding(Dimens.largePadding)
 
             ) {
                 MainScreen(navController = navController, paddings = it, images)
