@@ -16,4 +16,5 @@
     <string name="clean">Clean</string>
     <string name="trash">Trash</string>
     <string name="help"><![CDATA[Help & feedback]]></string>
+    <string name="kb">" Kb"</string>
 </resources>

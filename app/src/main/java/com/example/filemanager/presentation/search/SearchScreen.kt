@@ -2,6 +2,7 @@
 
 package com.example.filemanager.presentation.search
 
+import android.util.Size
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,10 +22,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.ui.Modifier
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -35,7 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.filemanager.R
 import com.example.filemanager.presentation.Screen
-import com.example.filemanager.presentation.home.loadThumbnail
+import com.example.filemanager.presentation.base.loadThumbnail
 import com.example.filemanager.presentation.images.ImageItemsState
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.ImageSize.imageSizeMedium
@@ -117,7 +118,7 @@ fun MySearchScreen(viewModel: SearchViewModel, navController: NavController) {
 
                 Row(modifier = Modifier.padding(Dimens.defaultPadding)) {
                     IconRounded(
-                        loadThumbnail(item.contentUri, LocalContext.current)
+                        loadThumbnail(item.contentUri, LocalContext.current, Size(320, 240))
                             ?: painterResource(R.drawable.placeholder_image)
                     )
                     Column(modifier = Modifier.padding(start = Dimens.defaultPadding)) {

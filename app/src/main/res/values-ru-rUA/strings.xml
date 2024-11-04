@@ -17,4 +17,5 @@
     <string name="clean">Очистка</string>
     <string name="trash">Корзина</string>
     <string name="help">Справка / Отзыв</string>
+    <string name="kb">" Кб"</string>
 </resources>
