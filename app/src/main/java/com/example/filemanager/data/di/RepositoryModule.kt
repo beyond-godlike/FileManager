@@ -2,7 +2,7 @@ package com.example.filemanager.data.di
 
 import android.app.Application
 import android.content.Context
-import com.example.filemanager.data.MediaRepository
+import com.example.filemanager.data.repository.MediaRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

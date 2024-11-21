@@ -7,7 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.util.Size
 import androidx.compose.runtime.Composable
-import com.example.filemanager.data.ImageItem
+import com.example.filemanager.data.repository.MediaItem
 
 
 @Composable
@@ -24,7 +24,7 @@ fun loadThumbnail(uri: Uri, context: Context, size: Size): Bitmap? {
     return BitmapFactory.decodeStream(context.contentResolver.openInputStream(uri), null, options)
 }
 @Composable
-fun getThumbnail(context: Context, item: ImageItem, size: Size) : Bitmap {
+fun getThumbnail(context: Context, item: MediaItem, size: Size) : Bitmap {
     val thumbnail: Bitmap? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         context.contentResolver
             .loadThumbnail(item.contentUri, size, null)

@@ -1,5 +1,6 @@
-package com.example.filemanager.presentation.images.components
+package com.example.filemanager.presentation.media.components
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.util.Size
@@ -24,17 +25,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.filemanager.data.ImageItem
+import com.example.filemanager.data.repository.MediaItem
 import com.example.filemanager.presentation.base.getThumbnail
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.Typography
+import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
-fun ImageGalleryGrid(images: List<ImageItem>, paddings: PaddingValues) {
-    val ims = images.groupBy { it.date }
+fun MediaGalleryGrid(media: List<MediaItem>, paddings: PaddingValues) {
+    val ims = media.groupBy { it.date }
     val context = LocalContext.current
 
-    LazyColumn(modifier = Modifier.padding(paddings)) {
+    LazyColumn(
+        modifier = Modifier
+            .padding(
+                top = paddings.calculateTopPadding(),
+                start = Dimens.defaultPadding,
+                end = Dimens.defaultPadding,
+            )
+    ) {
         items(ims.entries.toList()) { entry ->
             val date = entry.key
             val imagesForDate = entry.value
@@ -42,20 +51,13 @@ fun ImageGalleryGrid(images: List<ImageItem>, paddings: PaddingValues) {
             Text(
                 text = date.toString(),
                 style = Typography.labelMedium,
-                modifier = Modifier.padding(top = Dimens.smallPadding, bottom = Dimens.smallPadding)
+                modifier = Modifier.padding(top = Dimens.defaultPadding, bottom = Dimens.smallPadding)
             )
             LazyRow {
                 items(imagesForDate) { item ->
                     GridItemCard(
                         item = item,
-                        onItemClick = {
-                            val intent = Intent().apply {
-                                action = Intent.ACTION_VIEW
-                                setDataAndType(it.contentUri, it.mimeType)
-                                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            }
-                            context.startActivity(intent)
-                        }
+                        context = context,
                     )
                 }
             }
@@ -63,17 +65,23 @@ fun ImageGalleryGrid(images: List<ImageItem>, paddings: PaddingValues) {
         }
     }
 }
-
 @Composable
 fun GridItemCard(
-    item: ImageItem,
-    onItemClick: (ImageItem) -> Unit,
+    item: MediaItem,
+    context: Context,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
-            .padding(Dimens.smallPadding)
-            .clickable { onItemClick(item) },
+            .padding(end = Dimens.smallPadding)
+            .clickable {
+                val intent = Intent().apply {
+                    action = Intent.ACTION_VIEW
+                    setDataAndType(item.contentUri, item.mimeType)
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(intent)
+            },
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
@@ -93,7 +101,7 @@ fun GridItemCard(
 @Composable
 fun ImageWithText(imageItem: Bitmap, text: String) {
     Box {
-        com.skydoves.landscapist.glide.GlideImage(
+        GlideImage(
             imageItem,
             contentDescription = "Image",
             modifier = Modifier

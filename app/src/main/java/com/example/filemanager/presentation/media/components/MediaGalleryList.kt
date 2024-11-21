@@ -1,7 +1,10 @@
-package com.example.filemanager.presentation.images.components
+package com.example.filemanager.presentation.media.components
 
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.util.Size
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,18 +28,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.filemanager.data.ImageItem
+import com.example.filemanager.data.repository.MediaItem
 import com.example.filemanager.presentation.base.getThumbnail
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.Typography
 
-
 @Composable
-fun ImageGalleryList(images: List<ImageItem>, paddings: PaddingValues) {
-    val ims = images.groupBy { it.date }
+fun MediaGalleryList(media: List<MediaItem>, paddings: PaddingValues) {
+    val ims = media.groupBy { it.date }
     val context = LocalContext.current
 
-    LazyColumn(modifier = Modifier.padding(paddings)) {
+    LazyColumn(
+        modifier = Modifier
+            .padding(
+                top = paddings.calculateTopPadding(),
+                start = Dimens.defaultPadding,
+                end = Dimens.defaultPadding,
+            )
+    ) {
         items(ims.entries.toList()) { entry ->
             val date = entry.key
             val imagesForDate = entry.value
@@ -47,11 +56,12 @@ fun ImageGalleryList(images: List<ImageItem>, paddings: PaddingValues) {
             )
             val h = (imagesForDate.size.dp * 64) + 32.dp
             LazyColumn(
-                modifier = Modifier.height(h)
+                modifier = androidx.compose.ui.Modifier.height(h)
             ) {
                 items(imagesForDate) { item ->
                     ListItemCard(
                         item,
+                        context,
                         modifier = Modifier
                     )
                 }
@@ -62,7 +72,8 @@ fun ImageGalleryList(images: List<ImageItem>, paddings: PaddingValues) {
 
 @Composable
 fun ListItemCard(
-    item: ImageItem,
+    item: MediaItem,
+    context: Context,
     modifier: Modifier = Modifier
 ) {
     val thumbnail = getThumbnail(LocalContext.current, item, Size(100, 100))
@@ -77,7 +88,16 @@ fun ListItemCard(
         SmallImage(thumbnail, 48.dp)
 
         Spacer(modifier = Modifier.width(Dimens.defaultPadding))
-        Column {
+        Column(
+            modifier = Modifier.clickable {
+                val intent = Intent().apply {
+                    action = Intent.ACTION_VIEW
+                    setDataAndType(item.contentUri, item.mimeType)
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(intent)
+            }
+        ) {
             Text(
                 text = item.name,
                 maxLines = 1,

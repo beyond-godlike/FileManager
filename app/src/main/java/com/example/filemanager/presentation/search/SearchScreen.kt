@@ -37,7 +37,6 @@ import androidx.navigation.NavController
 import com.example.filemanager.R
 import com.example.filemanager.presentation.Screen
 import com.example.filemanager.presentation.base.loadThumbnail
-import com.example.filemanager.presentation.images.ImageItemsState
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.ImageSize.imageSizeMedium
 import com.example.filemanager.presentation.theme.ui.Typography
@@ -50,15 +49,15 @@ fun SearchScreen(navController: NavController) {
     val context = LocalContext.current
 
     when (imageItemsState.value) {
-        is ImageItemsState.Error -> {
-            Text((imageItemsState.value as ImageItemsState.Error).e, Modifier.fillMaxWidth())
+        is SearchItemsState.Error -> {
+            Text((imageItemsState.value as SearchItemsState.Error).e, Modifier.fillMaxWidth())
         }
 
-        is ImageItemsState.Empty -> {
+        is SearchItemsState.Empty -> {
             viewModel.dispatch(SearchIntent.LoadImages, context)
         }
 
-        is ImageItemsState.Success -> {
+        is SearchItemsState.Success -> {
             MySearchScreen(viewModel, navController)
         }
 

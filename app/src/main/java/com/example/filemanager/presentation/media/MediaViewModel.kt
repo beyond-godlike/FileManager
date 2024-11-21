@@ -1,12 +1,12 @@
-package com.example.filemanager.presentation.images
+package com.example.filemanager.presentation.media
 
 import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.filemanager.data.MediaRepository
-import com.example.filemanager.presentation.home.MediaState
+import com.example.filemanager.data.MediaType
+import com.example.filemanager.data.repository.MediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ImagesViewModel @Inject constructor(val repository: MediaRepository) : ViewModel() {
+class MediaViewModel @Inject constructor(val repository: MediaRepository) : ViewModel() {
     private val _state = MutableStateFlow(MediaState())
     val state: StateFlow<MediaState> = _state.asStateFlow()
 
@@ -26,16 +26,20 @@ class ImagesViewModel @Inject constructor(val repository: MediaRepository) : Vie
     fun toggleLayout() {
         _isGridLayout.value = !_isGridLayout.value
     }
-    fun dispatch(intent: ImagesIntent, context: Context) {
+    fun dispatch(intent: MediaIntent, context: Context) {
         when (intent) {
-            is ImagesIntent.LoadImages -> {
+            is MediaIntent.LoadMedia -> {
                 viewModelScope.launch {
-                    _state.update { it.copy(isLoading = true) }
-                    try {
-                        val images = repository.loadAllImagesFromMediaStore(context)
-                        _state.update { it.copy(images = images, isLoading = false) }
-                    } catch (e: Exception) {
-                        _state.update { it.copy(error = e.message, isLoading = false) }
+                    when (intent.type) {
+                        MediaType.IMAGES -> {
+                            val images = repository.loadAllImagesFromMediaStore(context)
+                            _state.update { it.copy(images, isLoading = false) }
+                        }
+
+                        MediaType.VIDEOS -> {
+                            val videos = repository.loadVideosFromMediaStore(context)
+                            _state.update { it.copy(videos, isLoading = false) }
+                        }
                     }
                 }
             }

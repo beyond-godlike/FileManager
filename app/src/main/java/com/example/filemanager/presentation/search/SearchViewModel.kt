@@ -2,11 +2,10 @@ package com.example.filemanager.presentation.search
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
-import com.example.filemanager.data.ImageItem
-import com.example.filemanager.data.MediaRepository
+import com.example.filemanager.data.repository.MediaItem
+import com.example.filemanager.data.repository.MediaRepository
 import com.example.filemanager.presentation.base.BaseViewModel
 import com.example.filemanager.presentation.base.Intent
-import com.example.filemanager.presentation.images.ImageItemsState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +23,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.text.contains
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
@@ -39,13 +37,13 @@ class SearchViewModel @Inject constructor(
     private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asStateFlow()
 
-    private val _imageItems = MutableStateFlow<ImageItemsState>(ImageItemsState.Empty)
-    val imageItems: StateFlow<ImageItemsState> = _imageItems.asStateFlow()
+    private val _imageItems = MutableStateFlow<SearchItemsState>(SearchItemsState.Empty)
+    val imageItems: StateFlow<SearchItemsState> = _imageItems.asStateFlow()
 
-    private val _allImageItems = MutableStateFlow<List<ImageItem>>(emptyList())
+    private val _allImageItems = MutableStateFlow<List<MediaItem>>(emptyList())
 
-    private fun updateItems(items: List<ImageItem>) {
-        _imageItems.value = ImageItemsState.Success(items)
+    private fun updateItems(items: List<MediaItem>) {
+        _imageItems.value = SearchItemsState.Success(items)
         _allImageItems.value = items
     }
 
@@ -84,7 +82,7 @@ class SearchViewModel @Inject constructor(
                             updateItems(repository.loadImagesFromMediaStore(context))
                         }
                     } catch (e: CancellationException) {
-                        _imageItems.value = ImageItemsState.Error(e.message.toString())
+                        _imageItems.value = SearchItemsState.Error(e.message.toString())
                     } finally {
                         job = null
                     }

@@ -74,7 +74,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.filemanager.R
-import com.example.filemanager.data.ImageItem
+import com.example.filemanager.data.repository.MediaItem
 import com.example.filemanager.presentation.Screen
 import com.example.filemanager.presentation.base.NavigationItem
 import com.example.filemanager.presentation.base.getThumbnail
@@ -93,12 +93,12 @@ fun HomeScreen(navController: NavController) {
         viewModel.dispatch(HomeIntent.LoadImages, context)
     }
 
-    ReadyHomeScreen(imageItemsState.value.images, navController, viewModel)
+    ReadyHomeScreen(imageItemsState.value.media, navController, viewModel)
 }
 
 @Composable
 fun ReadyHomeScreen(
-    images: List<ImageItem>,
+    images: List<MediaItem>,
     navController: NavController,
     viewModel: HomeViewModel
 ) {
@@ -234,7 +234,7 @@ fun ReadyHomeScreen(
 }
 
 @Composable
-fun RowImages(images: List<ImageItem>) {
+fun RowImages(images: List<MediaItem>) {
     LazyRow {
         items(images) { item ->
             val thumbnail = getThumbnail(LocalContext.current, item, Size(320, 240))
@@ -258,7 +258,7 @@ fun ImageRounded(imageItem: Bitmap) {
 }
 
 @Composable
-fun MainScreen(navController: NavController, paddings: PaddingValues, images: List<ImageItem>) {
+fun MainScreen(navController: NavController, paddings: PaddingValues, images: List<MediaItem>) {
     Column(
         modifier = Modifier.padding(
             start = paddings.calculateStartPadding(LayoutDirection.Ltr),

@@ -1,10 +1,9 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.example.filemanager.presentation.images
+package com.example.filemanager.presentation.media
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.List
@@ -22,54 +21,48 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.filemanager.R
+import com.example.filemanager.data.MediaType
 import com.example.filemanager.presentation.Screen
-import com.example.filemanager.presentation.images.components.ImageGalleryGrid
-import com.example.filemanager.presentation.images.components.ImageGalleryList
+import com.example.filemanager.presentation.media.components.MediaGalleryGrid
+import com.example.filemanager.presentation.media.components.MediaGalleryList
 import com.example.filemanager.presentation.theme.ui.Dimens
 
 @Composable
-fun ImagesScreen(navController: NavController) {
-    val viewModel: ImagesViewModel = hiltViewModel()
-    val imageItemsState = viewModel.state.collectAsState()
+fun MediaScreen(navController: NavController, type: MediaType) {
+    val viewModel: MediaViewModel = hiltViewModel()
+    val mediaState = viewModel.state.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(key1 = Unit) {
-        viewModel.dispatch(ImagesIntent.LoadImages, context)
+        viewModel.dispatch(MediaIntent.LoadMedia(type), context)
     }
 
     Scaffold(
         topBar = {
-            ImagesTopAppBar(navController, viewModel)
+            MediaTopAppBar(navController, viewModel)
         }
     ) { paddings ->
         when(viewModel.isGridLayout.value) {
-            true -> ImageGalleryGrid(imageItemsState.value.images, paddings)
-            false -> ImageGalleryList(imageItemsState.value.images, paddings)
+            //передать state
+            true -> MediaGalleryGrid(mediaState.value.media, paddings)
+            false -> MediaGalleryList(mediaState.value.media, paddings)
         }
     }
-
 }
 
 @Composable
-fun ImagesTopAppBar(navController: NavController, viewModel: ImagesViewModel) {
+fun MediaTopAppBar(navController: NavController, viewModel: MediaViewModel) {
     TopAppBar(
-        title = {
-            Text(
-                text = stringResource(R.string.images),
-                //style = Typography.titleLarge
-            )
-        },
+        title = { Text(text = stringResource(R.string.images), fontSize = 18.sp) },
         navigationIcon = {
             IconButton(
                 onClick = {
                     navController.navigate(Screen.HomeScreen.route)
-                },
-                modifier = Modifier
-                    .size(24.dp)
+                }
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
@@ -81,9 +74,7 @@ fun ImagesTopAppBar(navController: NavController, viewModel: ImagesViewModel) {
             IconButton(
                 onClick = {
                     navController.navigate(Screen.SearchScreen.route)
-                },
-                modifier = Modifier
-                    .size(24.dp)
+                }
             ) {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -93,9 +84,7 @@ fun ImagesTopAppBar(navController: NavController, viewModel: ImagesViewModel) {
             IconButton(
                 onClick = {
                     viewModel.toggleLayout()
-                },
-                modifier = Modifier
-                    .size(24.dp)
+                }
             ) {
                 Icon(
                     imageVector = Icons.Default.List,
@@ -103,10 +92,7 @@ fun ImagesTopAppBar(navController: NavController, viewModel: ImagesViewModel) {
                 )
             }
             IconButton(
-                onClick = {
-
-                },
-                modifier = Modifier.size(24.dp)
+                onClick = { }
             ) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
@@ -118,4 +104,3 @@ fun ImagesTopAppBar(navController: NavController, viewModel: ImagesViewModel) {
         modifier = Modifier.fillMaxWidth().padding(Dimens.defaultPadding)
     )
 }
-
