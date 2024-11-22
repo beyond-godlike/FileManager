@@ -90,7 +90,7 @@ fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
 
     LaunchedEffect(key1 = Unit) {
-        viewModel.dispatch(HomeIntent.LoadImages, context)
+        viewModel.dispatch(HomeIntent.LoadMedia, context)
     }
 
     ReadyHomeScreen(imageItemsState.value.media, navController, viewModel)

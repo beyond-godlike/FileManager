@@ -33,12 +33,29 @@ class MediaViewModel @Inject constructor(val repository: MediaRepository) : View
                     when (intent.type) {
                         MediaType.IMAGES -> {
                             val images = repository.loadAllImagesFromMediaStore(context)
-                            _state.update { it.copy(images, isLoading = false) }
+                            _state.update { it.copy(media = images, isLoading = false) }
                         }
 
                         MediaType.VIDEOS -> {
                             val videos = repository.loadVideosFromMediaStore(context)
-                            _state.update { it.copy(videos, isLoading = false) }
+                            _state.update { it.copy(media = videos, isLoading = false) }
+                        }
+
+                        MediaType.AUDIOS -> {
+                            val audios = repository.loadAudios(context)
+                            _state.update { it.copy(media = audios, isLoading = false) }
+                        }
+                        MediaType.DOWNLOADS -> {
+                            val downloads = repository.loadDownloads(context)
+                            _state.update { it.copy(media = downloads, isLoading = false) }
+                        }
+                        MediaType.DOCUMENTS -> {
+                            val documents = repository.loadDocuments(context)
+                            _state.update { it.copy(media = documents, isLoading = false) }
+                        }
+                        MediaType.APPLICATIONS -> {
+                            val applications = repository.loadApplications(context)
+                            _state.update { it.copy(media = applications, isLoading = false) }
                         }
                     }
                 }

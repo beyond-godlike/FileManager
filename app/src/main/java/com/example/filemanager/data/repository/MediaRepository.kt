@@ -222,4 +222,24 @@ class MediaRepository {
         }
         return videoList
     }
+
+    fun loadAudios(context: Context): List<MediaItem> {
+        val list = mutableListOf<MediaItem>()
+        return list
+    }
+
+    fun loadDownloads(context: Context): List<MediaItem> {
+        val list = mutableListOf<MediaItem>()
+        return list
+    }
+
+    fun loadDocuments(context: Context): List<MediaItem> {
+        val list = mutableListOf<MediaItem>()
+        return list
+    }
+
+    fun loadApplications(context: Context): List<MediaItem> {
+        val list = mutableListOf<MediaItem>()
+        return list
+    }
 }

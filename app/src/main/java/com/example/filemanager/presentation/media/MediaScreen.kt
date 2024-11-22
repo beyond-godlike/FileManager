@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.filemanager.R
 import com.example.filemanager.data.MediaType
 import com.example.filemanager.presentation.Screen
 import com.example.filemanager.presentation.media.components.MediaGalleryGrid
@@ -43,7 +42,7 @@ fun MediaScreen(navController: NavController, type: MediaType) {
 
     Scaffold(
         topBar = {
-            MediaTopAppBar(navController, viewModel)
+            MediaTopAppBar(navController, viewModel, type.value)
         }
     ) { paddings ->
         when(viewModel.isGridLayout.value) {
@@ -55,9 +54,9 @@ fun MediaScreen(navController: NavController, type: MediaType) {
 }
 
 @Composable
-fun MediaTopAppBar(navController: NavController, viewModel: MediaViewModel) {
+fun MediaTopAppBar(navController: NavController, viewModel: MediaViewModel, value: Int) {
     TopAppBar(
-        title = { Text(text = stringResource(R.string.images), fontSize = 18.sp) },
+        title = { Text(text = stringResource(value), fontSize = 18.sp) },
         navigationIcon = {
             IconButton(
                 onClick = {

@@ -24,12 +24,12 @@ class HomeViewModel @Inject constructor(val repository: MediaRepository) : ViewM
 
     fun dispatch(intent: HomeIntent, context: Context) {
         when (intent) {
-            is HomeIntent.LoadImages -> {
+            is HomeIntent.LoadMedia -> {
                 viewModelScope.launch {
                     _state.update { it.copy(isLoading = true) }
                     try {
                         val images = repository.loadImagesFromMediaStore(context)
-                        _state.update { it.copy(images, isLoading = false) }
+                        _state.update { it.copy(media = images, isLoading = false) }
                     } catch (e: Exception) {
                         _state.update { it.copy(error = e.message, isLoading = false) }
                     }

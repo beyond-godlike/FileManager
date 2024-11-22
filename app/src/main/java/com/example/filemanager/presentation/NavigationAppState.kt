@@ -13,6 +13,10 @@ import com.example.filemanager.presentation.storage.StorageScreen
 sealed class Screen(val route: String) {
     object HomeScreen : Screen("home")
     object ImagesScreen : Screen("images")
+    object DocumentsScreen : Screen("documents")
+    object DownloadsScreen : Screen("downloads")
+    object AudioScreen : Screen("audio")
+    object AppsScreen : Screen("apps")
     object VideoScreen : Screen("videos")
     object StorageScreen : Screen("storage")
     object SearchScreen : Screen("search")
@@ -28,6 +32,18 @@ fun Navigation(navController: NavHostController) {
         }
         composable(route = Screen.VideoScreen.route) {
             MediaScreen(navController, MediaType.VIDEOS)
+        }
+        composable(route = Screen.AudioScreen.route) {
+            MediaScreen(navController, MediaType.AUDIOS)
+        }
+        composable(route = Screen.DocumentsScreen.route) {
+            MediaScreen(navController, MediaType.DOCUMENTS)
+        }
+        composable(route = Screen.DownloadsScreen.route) {
+            MediaScreen(navController, MediaType.DOWNLOADS)
+        }
+        composable(route = Screen.AppsScreen.route) {
+            MediaScreen(navController, MediaType.APPLICATIONS)
         }
         composable(route = Screen.StorageScreen.route) {
             StorageScreen()
