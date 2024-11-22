@@ -79,7 +79,7 @@ class SearchViewModel @Inject constructor(
                 job = viewModelScope.launch {
                     try {
                         withContext(Dispatchers.IO) {
-                            updateItems(repository.loadImagesFromMediaStore(context))
+                            updateItems(repository.loadLastMedia(context))
                         }
                     } catch (e: CancellationException) {
                         _imageItems.value = SearchItemsState.Error(e.message.toString())

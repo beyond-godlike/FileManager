@@ -2,7 +2,6 @@ package com.example.filemanager.presentation.media.components
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,7 +50,10 @@ fun MediaGalleryGrid(media: List<MediaItem>, paddings: PaddingValues) {
             Text(
                 text = date.toString(),
                 style = Typography.labelMedium,
-                modifier = Modifier.padding(top = Dimens.defaultPadding, bottom = Dimens.smallPadding)
+                modifier = Modifier.padding(
+                    top = Dimens.defaultPadding,
+                    bottom = Dimens.smallPadding
+                )
             )
             LazyRow {
                 items(imagesForDate) { item ->
@@ -65,6 +67,7 @@ fun MediaGalleryGrid(media: List<MediaItem>, paddings: PaddingValues) {
         }
     }
 }
+
 @Composable
 fun GridItemCard(
     item: MediaItem,
@@ -99,11 +102,10 @@ fun GridItemCard(
 }
 
 @Composable
-fun ImageWithText(imageItem: Bitmap, text: String) {
+fun ImageWithText(imageItem: Any, text: String) {
     Box {
         GlideImage(
-            imageItem,
-            contentDescription = "Image",
+            { imageItem },
             modifier = Modifier
                 .width(120.dp)
                 .height(120.dp),

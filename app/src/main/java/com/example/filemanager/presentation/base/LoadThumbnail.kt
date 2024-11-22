@@ -2,34 +2,24 @@ package com.example.filemanager.presentation.base
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Size
 import androidx.compose.runtime.Composable
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
+import com.example.filemanager.R
 import com.example.filemanager.data.repository.MediaItem
 
 
-@Composable
-fun loadThumbnail(uri: Uri, context: Context, size: Size): Bitmap? {
-    val options = BitmapFactory.Options()
-    options.inJustDecodeBounds = true
-    BitmapFactory.decodeStream(
-        context.contentResolver.openInputStream(uri),
-        null, options
-    )
-    val scale = (options.outWidth / size.width).coerceAtLeast(options.outHeight / size.height)
-    options.inJustDecodeBounds = false
-    options.inSampleSize = scale
-    return BitmapFactory.decodeStream(context.contentResolver.openInputStream(uri), null, options)
-}
+//https://stackoverflow.com/questions/58030463/album-art-column-is-deprecated-from-api-29-and-so-on-how-to-obtain-path
 @Composable
 fun getThumbnail(context: Context, item: MediaItem, size: Size) : Bitmap {
     val thumbnail: Bitmap? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         context.contentResolver
-            .loadThumbnail(item.contentUri, size, null)
-    } else {
-        loadThumbnail(item.contentUri, context, size)
+            .loadThumbnail(item.contentUri.normalizeScheme(), size, null)
+    } else  {
+        MediaStore.Images.Thumbnails.getThumbnail(context.contentResolver, item.id, MediaStore.Images.Thumbnails.MINI_KIND, null)
     }
-    return thumbnail!!
+    return thumbnail ?: ContextCompat.getDrawable(context, R.drawable.placeholder_image)!!.toBitmap()
 }

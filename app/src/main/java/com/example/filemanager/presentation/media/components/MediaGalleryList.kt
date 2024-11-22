@@ -32,6 +32,7 @@ import com.example.filemanager.data.repository.MediaItem
 import com.example.filemanager.presentation.base.getThumbnail
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.Typography
+import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun MediaGalleryList(media: List<MediaItem>, paddings: PaddingValues) {
@@ -117,9 +118,8 @@ fun ListItemCard(
 
 @Composable
 fun SmallImage(bitmap: Bitmap, size: Dp) {
-    com.skydoves.landscapist.glide.GlideImage(
-        imageModel = bitmap,
-        contentDescription = "Image",
+    GlideImage(
+        imageModel = { bitmap },
         modifier = Modifier
             .width(size)
             .height(size),

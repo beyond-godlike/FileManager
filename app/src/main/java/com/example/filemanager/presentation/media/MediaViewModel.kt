@@ -32,12 +32,12 @@ class MediaViewModel @Inject constructor(val repository: MediaRepository) : View
                 viewModelScope.launch {
                     when (intent.type) {
                         MediaType.IMAGES -> {
-                            val images = repository.loadAllImagesFromMediaStore(context)
+                            val images = repository.loadImages(context)
                             _state.update { it.copy(media = images, isLoading = false) }
                         }
 
                         MediaType.VIDEOS -> {
-                            val videos = repository.loadVideosFromMediaStore(context)
+                            val videos = repository.loadVideos(context)
                             _state.update { it.copy(media = videos, isLoading = false) }
                         }
 

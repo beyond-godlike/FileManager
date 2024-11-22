@@ -3,7 +3,6 @@
 package com.example.filemanager.presentation.home
 
 import android.graphics.Bitmap
-import android.os.Build
 import android.util.Size
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -63,7 +62,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -81,6 +79,7 @@ import com.example.filemanager.presentation.base.getThumbnail
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.ImageSize
 import com.example.filemanager.presentation.theme.ui.Typography
+import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.launch
 
 @Composable
@@ -246,14 +245,12 @@ fun RowImages(images: List<MediaItem>) {
 
 @Composable
 fun ImageRounded(imageItem: Bitmap) {
-    com.skydoves.landscapist.glide.GlideImage(
-        imageModel = imageItem,
-        contentDescription = "Image",
+    GlideImage(
+        imageModel = { imageItem },
         modifier = Modifier
             .width(100.dp)
             .height(150.dp)
-            .clip(RoundedCornerShape(16.dp)),
-        contentScale = ContentScale.Crop
+            .clip(RoundedCornerShape(16.dp))
     )
 }
 
@@ -290,11 +287,8 @@ fun MainScreen(navController: NavController, paddings: PaddingValues, images: Li
                     .align(Alignment.CenterEnd)
             )
         }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            Spacer(modifier = Modifier.height(16.dp))
-            RowImages(images)
-        }
+        Spacer(modifier = Modifier.height(16.dp))
+        RowImages(images)
 
         Text(
             text = stringResource(R.string.categories),

@@ -28,7 +28,7 @@ class HomeViewModel @Inject constructor(val repository: MediaRepository) : ViewM
                 viewModelScope.launch {
                     _state.update { it.copy(isLoading = true) }
                     try {
-                        val images = repository.loadImagesFromMediaStore(context)
+                        val images = repository.loadLastMedia(context)
                         _state.update { it.copy(media = images, isLoading = false) }
                     } catch (e: Exception) {
                         _state.update { it.copy(error = e.message, isLoading = false) }

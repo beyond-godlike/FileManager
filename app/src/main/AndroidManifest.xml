@@ -17,6 +17,8 @@
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"
         android:minSdkVersion="29"/>
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage" />
 
     <application
         android:name=".presentation.FileManagerApp"
@@ -28,7 +30,9 @@
         android:roundIcon="@drawable/document_24"
         android:supportsRtl="true"
         android:theme="@style/Theme.FileManager"
-        tools:targetApi="31">
+        android:preserveLegacyExternalStorage="true"
+        android:requestLegacyExternalStorage="true"
+        tools:targetApi="33">
         <activity
             android:name=".presentation.MainActivity"
             android:exported="true"
