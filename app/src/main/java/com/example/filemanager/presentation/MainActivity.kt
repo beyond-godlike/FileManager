@@ -3,11 +3,14 @@ package com.example.filemanager.presentation
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +41,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPermissionsApi::class)
 class MainActivity : ComponentActivity() {
 
+    private lateinit var intentSenderLauncher: ActivityResultLauncher<IntentSenderRequest>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -78,6 +82,7 @@ class MainActivity : ComponentActivity() {
                             "perms are denied permanently",
                             onClick = { openAppSettings() }
                         )
+                        //Navigation(navController = navController)
                     }
                 }
 
@@ -87,24 +92,32 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PermissionAlertDialog(text: String,  onClick: () -> Unit) {
+fun PermissionAlertDialog(text: String, onClick: () -> Unit) {
     Column(
-       modifier = Modifier.fillMaxSize(),
-       horizontalAlignment = Alignment.CenterHorizontally,
-       verticalArrangement = Arrangement.Center
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Button(onClick = {
-            onClick()
-        }, modifier = Modifier.padding(Dimens.smallPadding)
+        Button(
+            onClick = {
+                onClick()
+            }, modifier = Modifier.padding(Dimens.smallPadding)
         ) {
             Text(text)
         }
     }
 }
-
 fun Activity.openAppSettings() {
-    Intent(
-        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-        Uri.fromParts("package", packageName, null)
-    ).also(::startActivity)
+    val uri = Uri.parse("package:$packageName")
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        Intent(
+            Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION,
+            uri
+        ).also(::startActivity)
+    } else {
+        Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            uri
+        ).also(::startActivity)
+    }
 }

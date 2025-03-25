@@ -3,7 +3,7 @@ package com.example.filemanager.data.repository
 import android.net.Uri
 import kotlinx.datetime.LocalDate
 
-data class MediaItem (
+data class MediaFile (
     val id: Long,
     val path: String,
     val date: LocalDate,

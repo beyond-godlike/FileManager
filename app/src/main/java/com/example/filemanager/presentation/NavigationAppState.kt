@@ -22,7 +22,9 @@ sealed class Screen(val route: String) {
     object SearchScreen : Screen("search")
 }
 @Composable
-fun Navigation(navController: NavHostController) {
+fun Navigation(
+    navController: NavHostController
+) {
     NavHost(navController, startDestination = Screen.HomeScreen.route) {
         composable(route = Screen.HomeScreen.route) {
             HomeScreen(navController = navController)

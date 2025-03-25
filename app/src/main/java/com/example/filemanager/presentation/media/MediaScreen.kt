@@ -2,6 +2,9 @@
 
 package com.example.filemanager.presentation.media
 
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -18,6 +21,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.filemanager.data.MediaType
+import com.example.filemanager.data.repository.MediaFile
 import com.example.filemanager.presentation.Screen
 import com.example.filemanager.presentation.media.components.MediaGalleryGrid
 import com.example.filemanager.presentation.media.components.MediaGalleryList
@@ -36,8 +41,42 @@ fun MediaScreen(navController: NavController, type: MediaType) {
     val mediaState = viewModel.state.collectAsState()
     val context = LocalContext.current
 
+    val intentSenderLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        viewModel.dispatch(
+            MediaIntent.HandleDeleteResult(result.resultCode == Activity.RESULT_OK),
+            context
+        )
+    }
+    viewModel.setDeleteResultLauncher(intentSenderLauncher)
+
     LaunchedEffect(key1 = Unit) {
         viewModel.dispatch(MediaIntent.LoadMedia(type), context)
+
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is MediaFileEffect.ShowDeleteSuccess -> {
+                    println("Deletion successful: ${effect.fileName}")
+                }
+
+                is MediaFileEffect.ShowDeleteError -> {
+                    println("Deletion error: ${effect.fileName} - ${effect.errorMessage}")
+                }
+
+                is MediaFileEffect.LaunchDeleteConfirmation -> {
+                    effect.intentSenderRequest?.let { request ->
+                        intentSenderLauncher.launch(request)
+                    }
+                }
+                // Handle other effects
+            }
+        }
+    }
+    val onDeleteClick: (MediaFile) -> Unit = remember {
+        { file ->
+            viewModel.dispatch(MediaIntent.DeleteFile(file), context)
+        }
     }
 
     Scaffold(
@@ -45,10 +84,12 @@ fun MediaScreen(navController: NavController, type: MediaType) {
             MediaTopAppBar(navController, viewModel, type.value)
         }
     ) { paddings ->
-        when(viewModel.isGridLayout.value) {
+        when (viewModel.isGridLayout.value) {
             //передать state
             true -> MediaGalleryGrid(mediaState.value.media, paddings)
-            false -> MediaGalleryList(mediaState.value.media, paddings)
+            false -> MediaGalleryList(mediaState.value.media, paddings, onDelete = {
+                onDeleteClick(it)
+            })
         }
     }
 }
@@ -100,6 +141,8 @@ fun MediaTopAppBar(navController: NavController, viewModel: MediaViewModel, valu
             }
         },
 
-        modifier = Modifier.fillMaxWidth().padding(Dimens.defaultPadding)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(Dimens.defaultPadding)
     )
 }

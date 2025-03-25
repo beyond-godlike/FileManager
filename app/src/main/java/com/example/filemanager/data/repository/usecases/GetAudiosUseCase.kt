@@ -4,17 +4,15 @@ import android.content.ContentUris
 import android.content.Context
 import android.provider.MediaStore
 import com.example.filemanager.data.repository.Ext
-import com.example.filemanager.data.repository.MediaItem
-import com.example.filemanager.domain.sdk29AndUp
+import com.example.filemanager.data.repository.MediaFile
 
 class GetAudiosUseCase {
-    suspend operator fun invoke(context: Context): List<MediaItem> {
-        val list = mutableListOf<MediaItem>()
-        val collection = sdk29AndUp {
+    operator fun invoke(context: Context): List<MediaFile> {
+        val list = mutableListOf<MediaFile>()
+        val collection =
             MediaStore.Audio.Media.getContentUri(
                 MediaStore.VOLUME_EXTERNAL
             )
-        } ?: MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
@@ -24,7 +22,7 @@ class GetAudiosUseCase {
             MediaStore.Audio.Media.MIME_TYPE,
             MediaStore.Audio.Media.DATE_MODIFIED,
             MediaStore.Audio.Media.SIZE
-            )
+        )
         val sortOrder = "${MediaStore.Audio.Media.DATE_MODIFIED} DESC"
 
         val query = context.contentResolver.query(
@@ -59,7 +57,7 @@ class GetAudiosUseCase {
 
                 val size = Ext.formatSize(cursor.getLong(sizeColumn))
 
-                list.add(MediaItem(id, path, date, name, mimeType, duration, contentUri, size))
+                list.add(MediaFile(id, path, date, name, mimeType, duration, contentUri, size))
             }
             cursor.close()
         }

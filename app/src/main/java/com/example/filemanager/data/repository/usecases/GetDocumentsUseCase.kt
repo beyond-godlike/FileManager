@@ -1,20 +1,26 @@
 package com.example.filemanager.data.repository.usecases
 
+import android.content.ContentUris
 import android.content.Context
-import android.net.Uri
 import android.provider.MediaStore
-import androidx.core.net.toUri
+import android.util.Log
 import com.example.filemanager.data.repository.Ext
-import com.example.filemanager.data.repository.MediaItem
-import com.example.filemanager.domain.sdk29AndUp
+import com.example.filemanager.data.repository.MediaFile
+import com.example.filemanager.domain.PermsHelper.Companion.hasStoragePermissions
 
 class GetDocumentsUseCase {
     //https://medium.com/@sendtosaeed2/android-fetch-all-files-from-local-storage-media-store-api-e9b914cd71e1
-    suspend operator fun invoke(context: Context): List<MediaItem> {
-        val list = mutableListOf<MediaItem>()
-        val collection = sdk29AndUp {
-            MediaStore.Files.getContentUri(MediaStore.VOLUME_INTERNAL)
-        } ?: MediaStore.Files.FileColumns.RELATIVE_PATH.toUri()
+    operator fun invoke(context: Context): List<MediaFile> {
+        if (!hasStoragePermissions(context)) {
+            // Handle missing permissions (e.g., request permissions)
+            return emptyList()
+        }
+
+        val list = mutableListOf<MediaFile>()
+        val collection =
+            MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
+
+        Log.e("DWN", "ID: $collection")
 
         val projection = arrayOf(
             MediaStore.Files.FileColumns._ID,
@@ -25,12 +31,17 @@ class GetDocumentsUseCase {
             MediaStore.Files.FileColumns.SIZE
         )
 
+        val sortOrder = "${MediaStore.Files.FileColumns.DATE_MODIFIED} DESC"
+
+        val selection = "${MediaStore.Files.FileColumns.MIME_TYPE} LIKE ?"
+        val selectionArgs = arrayOf("application/pdf")
+
         val query = context.contentResolver.query(
             collection,
             projection,
             null,
             null,
-            null
+            sortOrder
         )
 
         query?.use { cursor ->
@@ -48,11 +59,16 @@ class GetDocumentsUseCase {
                 val name = cursor.getString(nameColumn)
                 val mimeType = cursor.getString(mimeTypeColumn)
                 val duration = 0
-                val contentUri = Uri.withAppendedPath(collection, id.toString())
-
+                val contentUri = ContentUris.appendId(
+                    collection.buildUpon(),
+                    id
+                ).build()
                 val size = Ext.formatSize(cursor.getLong(sizeColumn))
 
-                list.add(MediaItem(id, path, date, name, mimeType, duration, contentUri, size))
+                Log.e("DWN", "ID: $id, Name: $name")
+                //if(mimeType.contains(FileType.PDF.ext) || mimeType.contains(FileType.TXT.ext)) {
+                    list.add(MediaFile(id, path, date, name, mimeType, duration, contentUri, size))
+                //}
             }
             cursor.close()
         }

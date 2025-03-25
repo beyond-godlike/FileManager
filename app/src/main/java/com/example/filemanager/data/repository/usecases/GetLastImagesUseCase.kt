@@ -4,17 +4,15 @@ import android.content.ContentUris
 import android.content.Context
 import android.provider.MediaStore
 import com.example.filemanager.data.repository.Ext
-import com.example.filemanager.data.repository.MediaItem
-import com.example.filemanager.domain.sdk29AndUp
+import com.example.filemanager.data.repository.MediaFile
 
 class GetLastMediaUseCase {
-    suspend operator fun invoke(context: Context): List<MediaItem> {
-        val media = mutableListOf<MediaItem>()
-        val collection = sdk29AndUp {
+    suspend operator fun invoke(context: Context): List<MediaFile> {
+        val media = mutableListOf<MediaFile>()
+        val collection =
             MediaStore.Images.Media.getContentUri(
                 MediaStore.VOLUME_EXTERNAL
             )
-        } ?: MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
 
         val projection = arrayOf(
@@ -65,7 +63,7 @@ class GetLastMediaUseCase {
                 val size = Ext.formatSize(cursor.getLong(sizeColumn))
 
                 if (counter < 10) {
-                    media.add(MediaItem(id, path, date, name, mimeType, duration, contentUri, size))
+                    media.add(MediaFile(id, path, date, name, mimeType, duration, contentUri, size))
                     counter++
                     continue
                 }

@@ -24,14 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.filemanager.data.repository.MediaItem
+import com.example.filemanager.data.repository.MediaFile
 import com.example.filemanager.presentation.base.getThumbnail
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.Typography
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
-fun MediaGalleryGrid(media: List<MediaItem>, paddings: PaddingValues) {
+fun MediaGalleryGrid(media: List<MediaFile>, paddings: PaddingValues) {
     val ims = media.groupBy { it.date }
     val context = LocalContext.current
 
@@ -70,7 +70,7 @@ fun MediaGalleryGrid(media: List<MediaItem>, paddings: PaddingValues) {
 
 @Composable
 fun GridItemCard(
-    item: MediaItem,
+    item: MediaFile,
     context: Context,
     modifier: Modifier = Modifier
 ) {

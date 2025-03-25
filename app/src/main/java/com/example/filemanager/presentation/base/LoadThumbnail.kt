@@ -9,10 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.example.filemanager.R
-import com.example.filemanager.data.repository.MediaItem
+import com.example.filemanager.data.repository.MediaFile
 
 @Composable
-fun getThumbnail(context: Context, item: MediaItem, size: Size) : Bitmap {
+fun getThumbnail(context: Context, item: MediaFile, size: Size) : Bitmap {
     val thumbnail: Bitmap? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         val bitmap = try {
             context.contentResolver.loadThumbnail(item.contentUri, size, null)

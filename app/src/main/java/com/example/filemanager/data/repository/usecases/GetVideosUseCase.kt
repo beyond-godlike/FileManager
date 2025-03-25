@@ -5,12 +5,12 @@ import android.content.Context
 import android.provider.MediaStore
 import com.example.filemanager.data.repository.Ext.Companion.formatSize
 import com.example.filemanager.data.repository.Ext.Companion.longToLocalDate
-import com.example.filemanager.data.repository.MediaItem
+import com.example.filemanager.data.repository.MediaFile
 import com.example.filemanager.domain.sdk29AndUp
 
 class GetVideosUseCase {
-    suspend operator fun invoke(context: Context): List<MediaItem> {
-        val videoList = mutableListOf<MediaItem>()
+    operator fun invoke(context: Context): List<MediaFile> {
+        val videoList = mutableListOf<MediaFile>()
         val collection = sdk29AndUp {
             MediaStore.Video.Media.getContentUri(
                 MediaStore.VOLUME_EXTERNAL
@@ -65,7 +65,7 @@ class GetVideosUseCase {
                 val mimeType = cursor.getString(mimeTypeColumn)
 
                 val videoItem = when (idColumn) {
-                    0 -> MediaItem(id, path, date, name, mimeType, duration, contentUri, size)
+                    0 -> MediaFile(id, path, date, name, mimeType, duration, contentUri, size)
                     else -> null
                 }
                 videoItem?.let { videoList.add(it) }

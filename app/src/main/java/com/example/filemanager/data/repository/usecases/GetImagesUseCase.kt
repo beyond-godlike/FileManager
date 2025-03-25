@@ -5,17 +5,14 @@ import android.content.Context
 import android.provider.MediaStore
 import com.example.filemanager.data.repository.Ext.Companion.formatSize
 import com.example.filemanager.data.repository.Ext.Companion.longToLocalDate
-import com.example.filemanager.data.repository.MediaItem
-import com.example.filemanager.domain.sdk29AndUp
+import com.example.filemanager.data.repository.MediaFile
 
 class GetImagesUseCase {
-    suspend operator fun invoke(context: Context): List<MediaItem> {
-        val images = mutableListOf<MediaItem>()
-        val collection = sdk29AndUp {
-            MediaStore.Images.Media.getContentUri(
-                MediaStore.VOLUME_EXTERNAL
-            )
-        } ?: MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    suspend operator fun invoke(context: Context): List<MediaFile> {
+        val images = mutableListOf<MediaFile>()
+        val collection = MediaStore.Images.Media.getContentUri(
+            MediaStore.VOLUME_EXTERNAL
+        )
 
 
         val projection = arrayOf(
@@ -58,7 +55,7 @@ class GetImagesUseCase {
 
                 val size = formatSize(cursor.getLong(sizeColumn))
 
-                images.add(MediaItem(id, path, date, name, mimeType, duration, contentUri, size))
+                images.add(MediaFile(id, path, date, name, mimeType, duration, contentUri, size))
             }
             cursor.close()
         }

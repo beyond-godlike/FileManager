@@ -2,7 +2,8 @@ package com.example.filemanager.presentation.search
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
-import com.example.filemanager.data.repository.MediaItem
+import com.example.filemanager.data.MediaType
+import com.example.filemanager.data.repository.MediaFile
 import com.example.filemanager.data.repository.MediaRepository
 import com.example.filemanager.presentation.base.BaseViewModel
 import com.example.filemanager.presentation.base.Intent
@@ -40,9 +41,9 @@ class SearchViewModel @Inject constructor(
     private val _imageItems = MutableStateFlow<SearchItemsState>(SearchItemsState.Empty)
     val imageItems: StateFlow<SearchItemsState> = _imageItems.asStateFlow()
 
-    private val _allImageItems = MutableStateFlow<List<MediaItem>>(emptyList())
+    private val _allImageItems = MutableStateFlow<List<MediaFile>>(emptyList())
 
-    private fun updateItems(items: List<MediaItem>) {
+    private fun updateItems(items: List<MediaFile>) {
         _imageItems.value = SearchItemsState.Success(items)
         _allImageItems.value = items
     }
@@ -79,7 +80,7 @@ class SearchViewModel @Inject constructor(
                 job = viewModelScope.launch {
                     try {
                         withContext(Dispatchers.IO) {
-                            updateItems(repository.loadLastMedia(context))
+                            updateItems(repository.loadMedia(context, MediaType.LAST_MEDIA))
                         }
                     } catch (e: CancellationException) {
                         _imageItems.value = SearchItemsState.Error(e.message.toString())

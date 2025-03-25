@@ -4,18 +4,17 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
-import androidx.core.net.toUri
 import com.example.filemanager.data.repository.Ext.Companion.formatSize
 import com.example.filemanager.data.repository.Ext.Companion.longToLocalDate
-import com.example.filemanager.data.repository.MediaItem
-import com.example.filemanager.domain.sdk29AndUp
+import com.example.filemanager.data.repository.MediaFile
 
 class GetDownloadsUseCase {
-    suspend operator fun invoke(context: Context): List<MediaItem> {
-        val downloads = mutableListOf<MediaItem>()
-        val collection = sdk29AndUp {
-            MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
-        } ?: MediaStore.Downloads.RELATIVE_PATH.toUri()
+    suspend operator fun invoke(context: Context): List<MediaFile> {
+        val downloads = mutableListOf<MediaFile>()
+        val collection =
+            MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL)
+
+            //MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
 
         val projection = arrayOf(
             MediaStore.Downloads._ID,
@@ -53,7 +52,7 @@ class GetDownloadsUseCase {
                 val size = formatSize(cursor.getLong(sizeColumn))
                 Log.e("DWN", "ID: $id, Name: $name, duration: $duration")
                 if(contentUri != null) {
-                    downloads.add(MediaItem(id, path, date, name, mimeType, duration, contentUri, size))
+                    downloads.add(MediaFile(id, path, date, name, mimeType, duration, contentUri, size))
                 }
             }
         }
