@@ -39,7 +39,7 @@ import com.example.filemanager.presentation.theme.ui.Dimens
 fun MediaScreen(navController: NavController, type: MediaType) {
     val viewModel: MediaViewModel = hiltViewModel()
     val mediaState = viewModel.state.collectAsState()
-    val context = LocalContext.current
+    val context = LocalContext.current.applicationContext
 
     val intentSenderLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()

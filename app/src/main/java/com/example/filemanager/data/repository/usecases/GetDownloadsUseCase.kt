@@ -14,8 +14,6 @@ class GetDownloadsUseCase {
         val collection =
             MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL)
 
-            //MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
-
         val projection = arrayOf(
             MediaStore.Downloads._ID,
             MediaStore.Downloads.DATA,

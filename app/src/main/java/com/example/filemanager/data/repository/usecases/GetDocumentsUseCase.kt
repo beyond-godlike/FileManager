@@ -12,7 +12,6 @@ class GetDocumentsUseCase {
     //https://medium.com/@sendtosaeed2/android-fetch-all-files-from-local-storage-media-store-api-e9b914cd71e1
     operator fun invoke(context: Context): List<MediaFile> {
         if (!hasStoragePermissions(context)) {
-            // Handle missing permissions (e.g., request permissions)
             return emptyList()
         }
 

@@ -3,7 +3,6 @@ package com.example.filemanager.presentation
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
@@ -109,15 +108,8 @@ fun PermissionAlertDialog(text: String, onClick: () -> Unit) {
 }
 fun Activity.openAppSettings() {
     val uri = Uri.parse("package:$packageName")
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        Intent(
-            Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION,
-            uri
-        ).also(::startActivity)
-    } else {
-        Intent(
-            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-            uri
-        ).also(::startActivity)
-    }
+    Intent(
+        Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION,
+        uri
+    ).also(::startActivity)
 }

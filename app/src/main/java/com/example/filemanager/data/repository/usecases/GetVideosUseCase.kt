@@ -6,16 +6,12 @@ import android.provider.MediaStore
 import com.example.filemanager.data.repository.Ext.Companion.formatSize
 import com.example.filemanager.data.repository.Ext.Companion.longToLocalDate
 import com.example.filemanager.data.repository.MediaFile
-import com.example.filemanager.domain.sdk29AndUp
 
 class GetVideosUseCase {
     operator fun invoke(context: Context): List<MediaFile> {
         val videoList = mutableListOf<MediaFile>()
-        val collection = sdk29AndUp {
-            MediaStore.Video.Media.getContentUri(
-                MediaStore.VOLUME_EXTERNAL
-            )
-        } ?: MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        val collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        //MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
 
 
         val projection = arrayOf(
@@ -50,7 +46,6 @@ class GetVideosUseCase {
             val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_MODIFIED)
 
             while (cursor.moveToNext()) {
-                // Get values of columns for a given video.
                 val id = cursor.getLong(idColumn)
                 val path = cursor.getString(pathColumn)
                 val name = cursor.getString(nameColumn)

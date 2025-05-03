@@ -24,8 +24,13 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -34,17 +39,19 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.filemanager.presentation.Screen
-import com.example.filemanager.presentation.base.getThumbnail
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.ImageSize.imageSizeMedium
 import com.example.filemanager.presentation.theme.ui.Typography
 import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SearchScreen(navController: NavController) {
     val viewModel: SearchViewModel = hiltViewModel()
     val imageItemsState = viewModel.imageItems.collectAsState()
-    val context = LocalContext.current
+    val context = LocalContext.current.applicationContext
 
     when (imageItemsState.value) {
         is SearchItemsState.Error -> {
@@ -67,6 +74,8 @@ fun MySearchScreen(viewModel: SearchViewModel, navController: NavController) {
     val searchText by viewModel.searchText.collectAsState()
     val itemsList by viewModel.items.collectAsState()
     val isSearching by viewModel.isSearching.collectAsState()
+    val scope = rememberCoroutineScope() // Создаем CoroutineScope
+    val context = LocalContext.current
 
     SearchBar(
         leadingIcon = {
@@ -114,9 +123,19 @@ fun MySearchScreen(viewModel: SearchViewModel, navController: NavController) {
             items(itemsList) { item ->
 
                 Row(modifier = Modifier.padding(Dimens.defaultPadding)) {
-                    IconRounded(
-                        getThumbnail(LocalContext.current, item, Size(320, 240))
-                    )
+                    var thumbnail by remember { mutableStateOf<Bitmap?>(null) }
+                    LaunchedEffect(item) {
+                        scope.launch(Dispatchers.IO) {
+                            val loadedThumbnail =
+                                context.contentResolver.loadThumbnail(item.contentUri, Size(320, 240), null)
+                            withContext(Dispatchers.Main) {
+                                thumbnail = loadedThumbnail
+                            }
+                        }
+                    }
+                    if (thumbnail != null) {
+                        IconRounded(imageItem = thumbnail!!)
+                    }
                     Column(modifier = Modifier.padding(start = Dimens.defaultPadding)) {
                         Text(
                             item.name,
