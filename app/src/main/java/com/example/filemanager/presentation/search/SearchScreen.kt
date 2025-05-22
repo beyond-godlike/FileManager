@@ -69,6 +69,7 @@ fun SearchScreen(navController: NavController) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MySearchScreen(viewModel: SearchViewModel, navController: NavController) {
     val searchText by viewModel.searchText.collectAsState()

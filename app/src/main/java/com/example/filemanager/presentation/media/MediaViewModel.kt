@@ -9,7 +9,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.filemanager.data.MediaType
 import com.example.filemanager.data.repository.MediaFile
 import com.example.filemanager.data.repository.MediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +36,9 @@ class MediaViewModel @Inject constructor(val repository: MediaRepository) : View
     private var currentFileToDeleteUri: Uri? = null
     private var currentFileToDeleteName: String? = null
 
+    private fun updateState(transform: (MediaState) -> MediaState) {
+        _state.update(transform)
+    }
     fun toggleLayout() {
         _isGridLayout.value = !_isGridLayout.value
     }
@@ -49,58 +51,22 @@ class MediaViewModel @Inject constructor(val repository: MediaRepository) : View
 
     fun dispatch(intent: MediaIntent, context: Context) {
         when (intent) {
-            is MediaIntent.LoadMedia -> {
-                viewModelScope.launch {
-                    when (intent.type) {
-                        MediaType.IMAGES -> {
-                            val images = repository.loadMedia(context, MediaType.IMAGES)
-                            _state.update { it.copy(media = images, isLoading = false) }
-                        }
-
-                        MediaType.LAST_MEDIA -> {
-                            val lastMedia = repository.loadMedia(context, MediaType.LAST_MEDIA)
-                            _state.update { it.copy(media = lastMedia, isLoading = false) }
-                        }
-
-                        MediaType.VIDEOS -> {
-                            val videos = repository.loadMedia(context, MediaType.VIDEOS)
-                            _state.update { it.copy(media = videos, isLoading = false) }
-                        }
-
-                        MediaType.AUDIOS -> {
-                            val audios = repository.loadMedia(context, MediaType.AUDIOS)
-                            _state.update { it.copy(media = audios, isLoading = false) }
-                        }
-
-                        MediaType.DOWNLOADS -> {
-                            val downloads = repository.loadMedia(context, MediaType.DOWNLOADS)
-                            _state.update { it.copy(media = downloads, isLoading = false) }
-                        }
-
-                        MediaType.DOCUMENTS -> {
-                            val documents = repository.loadMedia(context, MediaType.DOWNLOADS)
-                            _state.update { it.copy(media = documents, isLoading = false) }
-                        }
-
-                        MediaType.APPLICATIONS -> {
-                            val applications = repository.loadMedia(context, MediaType.APPLICATIONS)
-                            _state.update { it.copy(media = applications, isLoading = false) }
-                        }
-                    }
+            is MediaIntent.LoadMedia -> viewModelScope.launch {
+                repository.loadMedia(context, intent.type).let { media ->
+                    _state.update { it.copy(media = media, isLoading = false) }
                 }
             }
-
             is MediaIntent.DeleteFile -> deleteFile(context, intent.file)
             is MediaIntent.HandleDeleteResult -> handleDeletionResult(intent.isSuccess)
         }
     }
 
     private fun deleteFile(context: Context, file: MediaFile) {
-
         viewModelScope.launch {
-            _state.update { it.copy(isDeleting = true, deletionResult = null, error = null) }
-            deleteMediaApi30(context, listOf(file.contentUri))
-            //performDirectDelete(context, file.contentUri)
+            updateState { it.copy(isDeleting = true, deletionResult = null, error = null) }
+            deleteResultLauncher?.let {
+                deleteMediaApi30(context, listOf(file.contentUri))
+            } ?: performDirectDelete(context, file.contentUri)
         }
     }
 
@@ -110,19 +76,15 @@ class MediaViewModel @Inject constructor(val repository: MediaRepository) : View
             val rowsDeleted = contentResolver.delete(fileUri, null, null)
 
             if (rowsDeleted > 0) {
-                _state.update { it.copy(isDeleting = false, deletionResult = true) }
+                updateState { it.copy(isDeleting = false, deletionResult = true) }
                 _effect.send(
                     MediaFileEffect.ShowDeleteSuccess(
                         getFileNameFromUri(context, fileUri) ?: "File"
                     )
                 )
             } else {
-                _state.update {
-                    it.copy(
-                        isDeleting = false,
-                        deletionResult = false,
-                        error = "Failed to delete file."
-                    )
+                updateState {
+                    it.copy(isDeleting = false, deletionResult = false, error = "Failed to delete file.")
                 }
                 _effect.send(
                     MediaFileEffect.ShowDeleteError(
@@ -135,7 +97,7 @@ class MediaViewModel @Inject constructor(val repository: MediaRepository) : View
 
     private fun deleteMediaApi30(context: Context, uris: List<Uri>) {
         viewModelScope.launch {
-            _state.update { it.copy(isDeleting = true, deletionResult = null, error = null) }
+            updateState { it.copy(isDeleting = true, deletionResult = null, error = null) }
             val contentResolver = context.contentResolver
             val intentSender = MediaStore.createDeleteRequest(contentResolver, uris).intentSender
             val senderRequest = IntentSenderRequest.Builder(intentSender).build()
@@ -146,7 +108,7 @@ class MediaViewModel @Inject constructor(val repository: MediaRepository) : View
 
     private fun handleDeletionResult(isSuccess: Boolean) {
         viewModelScope.launch {
-            _state.update { it.copy(isDeleting = false, deletionResult = isSuccess) }
+            updateState { it.copy(isDeleting = false, deletionResult = isSuccess) }
             currentFileToDeleteName?.let { name ->
                 if (isSuccess) {
                     _effect.send(MediaFileEffect.ShowDeleteSuccess(name))
