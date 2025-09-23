@@ -75,7 +75,7 @@ fun MySearchScreen(viewModel: SearchViewModel, navController: NavController) {
     val searchText by viewModel.searchText.collectAsState()
     val itemsList by viewModel.items.collectAsState()
     val isSearching by viewModel.isSearching.collectAsState()
-    val scope = rememberCoroutineScope() // Создаем CoroutineScope
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     SearchBar(

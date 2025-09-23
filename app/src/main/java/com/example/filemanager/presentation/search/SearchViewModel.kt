@@ -10,14 +10,18 @@ import com.example.filemanager.presentation.base.Intent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -48,13 +52,21 @@ class SearchViewModel @Inject constructor(
         _allImageItems.value = items
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val items = searchText
         .debounce(300L)
+        .distinctUntilChanged()
         .onEach { _isSearching.update { true } }
-        .combine(_allImageItems) { text, allItems ->
-            allItems.takeIf { text.isNotBlank() }
-                ?.filter { it.name.contains(text, ignoreCase = true) }
-                ?: allItems
+        .flatMapLatest { text ->
+            if (text.isBlank()) {
+                _allImageItems
+            } else {
+                _allImageItems
+                    .map { allItems ->
+                        allItems.filter { it.name.contains(text, ignoreCase = true) }
+                    }
+                    .flowOn(Dispatchers.Default)
+            }
         }
         .stateIn(
             viewModelScope,
