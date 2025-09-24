@@ -40,6 +40,7 @@ import com.example.filemanager.presentation.media.MediaIntent
 import com.example.filemanager.presentation.media.MediaViewModel
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.Typography
+import com.example.filemanager.presentation.utils.open
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
@@ -105,12 +106,7 @@ fun ListItemCard(
         Spacer(modifier = Modifier.width(Dimens.defaultPadding))
         Column(
             modifier = Modifier.clickable {
-                val intent = Intent().apply {
-                    action = Intent.ACTION_VIEW
-                    setDataAndType(item.contentUri, item.mimeType)
-                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-                context.startActivity(intent)
+                item.contentUri.open(context, item.mimeType)
             }
         ) {
             Text(

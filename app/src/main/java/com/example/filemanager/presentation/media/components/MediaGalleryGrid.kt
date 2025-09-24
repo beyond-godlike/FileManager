@@ -1,7 +1,6 @@
 package com.example.filemanager.presentation.media.components
 
 import android.content.Context
-import android.content.Intent
 import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,6 +27,7 @@ import com.example.filemanager.data.repository.MediaFile
 import com.example.filemanager.presentation.base.getThumbnail
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.Typography
+import com.example.filemanager.presentation.utils.open
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
@@ -78,12 +78,7 @@ fun GridItemCard(
         modifier = modifier
             .padding(end = Dimens.smallPadding)
             .clickable {
-                val intent = Intent().apply {
-                    action = Intent.ACTION_VIEW
-                    setDataAndType(item.contentUri, item.mimeType)
-                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-                context.startActivity(intent)
+                item.contentUri.open(context, item.mimeType)
             },
         colors = CardDefaults.cardColors(
             containerColor = Color.White

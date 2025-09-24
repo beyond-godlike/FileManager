@@ -4,6 +4,7 @@ package com.example.filemanager.presentation.search
 
 import android.graphics.Bitmap
 import android.util.Size
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -42,11 +44,13 @@ import com.example.filemanager.presentation.Screen
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.ImageSize.imageSizeMedium
 import com.example.filemanager.presentation.theme.ui.Typography
+import com.example.filemanager.presentation.utils.open
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(navController: NavController) {
     val viewModel: SearchViewModel = hiltViewModel()
@@ -121,31 +125,53 @@ fun MySearchScreen(viewModel: SearchViewModel, navController: NavController) {
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            items(itemsList) { item ->
-
-                Row(modifier = Modifier.padding(Dimens.defaultPadding)) {
-                    var thumbnail by remember { mutableStateOf<Bitmap?>(null) }
-                    LaunchedEffect(item) {
-                        scope.launch(Dispatchers.IO) {
-                            val loadedThumbnail =
-                                context.contentResolver.loadThumbnail(item.contentUri, Size(320, 240), null)
-                            withContext(Dispatchers.Main) {
-                                thumbnail = loadedThumbnail
+            items(itemsList, key = { it.contentUri }) { item ->
+                Row(
+                    modifier = Modifier
+                        .padding(Dimens.defaultPadding)
+                        .fillMaxWidth()
+                        .clickable {
+                            item.contentUri.open(context, item.mimeType)
+                        }
+                ) {
+                    LazyRow {
+                        item {
+                            /* ждем библиотеку
+                        AsyncImage(
+                        model = item.contentUri,
+                        contentDescription = item.name,
+                        modifier = Modifier
+                            .size(imageSizeMedium)
+                            .clip(RoundedCornerShape(4.dp))
+                    )
+                         */
+                            var thumbnail by remember { mutableStateOf<Bitmap?>(null) }
+                            LaunchedEffect(item) {
+                                scope.launch(Dispatchers.IO) {
+                                    val loadedThumbnail =
+                                        context.contentResolver.loadThumbnail(item.contentUri, Size(320, 240), null)
+                                    withContext(Dispatchers.Main) {
+                                        thumbnail = loadedThumbnail
+                                    }
+                                }
+                            }
+                            if (thumbnail != null) {
+                                IconRounded(imageItem = thumbnail!!)
                             }
                         }
                     }
-                    if (thumbnail != null) {
-                        IconRounded(imageItem = thumbnail!!)
-                    }
-                    Column(modifier = Modifier.padding(start = Dimens.defaultPadding)) {
+                    Column(
+                        modifier = Modifier
+                            .padding(start = Dimens.defaultPadding)
+                            .weight(1f)
+                    ) {
                         Text(
-                            item.name,
+                            text = item.name,
                             style = Typography.titleMedium,
-                            modifier = Modifier
-                                .fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth()
                         )
                         Text(
-                            "",
+                            text = "",
                             style = Typography.labelSmall
                         )
                     }
@@ -158,7 +184,7 @@ fun MySearchScreen(viewModel: SearchViewModel, navController: NavController) {
 @Composable
 fun IconRounded(imageItem: Bitmap) {
     GlideImage(
-        imageModel = {imageItem},
+        imageModel = { imageItem },
         modifier = Modifier
             .width(imageSizeMedium)
             .height(imageSizeMedium)
