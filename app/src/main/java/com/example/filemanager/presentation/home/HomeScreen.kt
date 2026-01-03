@@ -86,10 +86,9 @@ import kotlinx.coroutines.launch
 fun HomeScreen(navController: NavController) {
     val viewModel: HomeViewModel = hiltViewModel()
     val imageItemsState = viewModel.state.collectAsState()
-    val context = LocalContext.current
 
     LaunchedEffect(key1 = Unit) {
-        viewModel.dispatch(HomeIntent.LoadMedia, context)
+        viewModel.dispatch(HomeIntent.LoadMedia)
     }
 
     ReadyHomeScreen(imageItemsState.value.media, navController, viewModel)
@@ -106,7 +105,7 @@ fun ReadyHomeScreen(
             title = stringResource(R.string.clean),
             selectedIcon = Icons.Filled.Home,
             unselectedIcon = Icons.Outlined.Star,
-            route = Screen.ImagesScreen.route
+            route = Screen.MediaScreen.route
         ),
         NavigationItem(
             title = stringResource(R.string.trash),
@@ -282,7 +281,7 @@ fun MainScreen(navController: NavController, paddings: PaddingValues, images: Li
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .clickable {
-                        // Handle the click event here
+                        navController.navigate(Screen.MediaScreen.route)
                     }
                     .align(Alignment.CenterEnd)
             )
@@ -322,7 +321,11 @@ fun CategoriesGrid(categories: List<CategoryItem>, navController: NavController)
                 painterResource(item.icon),
                 title = context.getString(item.title),
                 description = item.description,
-                onClick = { item.route.let { navController.navigate(it) } }
+                onClick = {
+                    item.mediaType.let {
+                        navController.navigate(Screen.MediaScreen.createRoute(it))
+                    }
+                }
             )
         }
     }

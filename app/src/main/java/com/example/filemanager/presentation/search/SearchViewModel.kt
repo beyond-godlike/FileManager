@@ -1,6 +1,5 @@
 package com.example.filemanager.presentation.search
 
-import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.example.filemanager.data.MediaType
 import com.example.filemanager.data.repository.MediaFile
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @OptIn(FlowPreview::class)
@@ -85,16 +83,15 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    override fun dispatch(intent: Intent, context: Context) {
+    override fun dispatch(intent: Intent) {
         when (intent) {
             is SearchIntent.LoadImages -> {
                 job?.cancel()
                 job = viewModelScope.launch {
                     try {
-                        withContext(Dispatchers.IO) {
-                            updateItems(repository.loadMedia(context, MediaType.LAST_MEDIA))
-                        }
-                    } catch (e: CancellationException) {
+                        updateItems(repository.loadMedia(MediaType.LAST_MEDIA))
+                    } catch (e: Exception) {
+                        if (e is CancellationException) throw e
                         _imageItems.value = SearchItemsState.Error(e.message.toString())
                     } finally {
                         job = null

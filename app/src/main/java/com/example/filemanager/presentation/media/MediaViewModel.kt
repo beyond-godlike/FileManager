@@ -21,6 +21,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+object GlobalLeakStore {
+    val leaks = mutableListOf<Any>()
+}
+
 @HiltViewModel
 class MediaViewModel @Inject constructor(val repository: MediaRepository) : ViewModel() {
     private val _state = MutableStateFlow(MediaState())
@@ -35,6 +39,11 @@ class MediaViewModel @Inject constructor(val repository: MediaRepository) : View
     private var deleteResultLauncher: ActivityResultLauncher<IntentSenderRequest>? = null
     private var currentFileToDeleteUri: Uri? = null
     private var currentFileToDeleteName: String? = null
+
+    init {
+        // Гарантированная утечка
+        GlobalLeakStore.leaks.add(this)
+    }
 
     private fun updateState(transform: (MediaState) -> MediaState) {
         _state.update(transform)
@@ -52,7 +61,7 @@ class MediaViewModel @Inject constructor(val repository: MediaRepository) : View
     fun dispatch(intent: MediaIntent, context: Context) {
         when (intent) {
             is MediaIntent.LoadMedia -> viewModelScope.launch {
-                repository.loadMedia(context, intent.type).let { media ->
+                repository.loadMedia(intent.type).let { media ->
                     _state.update { it.copy(media = media, isLoading = false) }
                 }
             }

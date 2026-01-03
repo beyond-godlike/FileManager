@@ -55,7 +55,6 @@ import kotlinx.coroutines.withContext
 fun SearchScreen(navController: NavController) {
     val viewModel: SearchViewModel = hiltViewModel()
     val imageItemsState = viewModel.imageItems.collectAsState()
-    val context = LocalContext.current.applicationContext
 
     when (imageItemsState.value) {
         is SearchItemsState.Error -> {
@@ -63,7 +62,7 @@ fun SearchScreen(navController: NavController) {
         }
 
         is SearchItemsState.Empty -> {
-            viewModel.dispatch(SearchIntent.LoadImages, context)
+            viewModel.dispatch(SearchIntent.LoadImages)
         }
 
         is SearchItemsState.Success -> {

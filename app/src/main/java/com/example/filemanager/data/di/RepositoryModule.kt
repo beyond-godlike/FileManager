@@ -1,18 +1,14 @@
 package com.example.filemanager.data.di
 
 import android.app.Application
+import android.content.ContentResolver
 import android.content.Context
+import com.example.filemanager.data.repository.FileBrowserRepository
 import com.example.filemanager.data.repository.MediaRepository
-import com.example.filemanager.data.repository.usecases.GetAppsUseCase
-import com.example.filemanager.data.repository.usecases.GetAudiosUseCase
-import com.example.filemanager.data.repository.usecases.GetDocumentsUseCase
-import com.example.filemanager.data.repository.usecases.GetDownloadsUseCase
-import com.example.filemanager.data.repository.usecases.GetImagesUseCase
-import com.example.filemanager.data.repository.usecases.GetLastMediaUseCase
-import com.example.filemanager.data.repository.usecases.GetVideosUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -24,51 +20,22 @@ class RepositoryModule {
     fun provideContext(application: Application): Context = application.applicationContext
 
     @Provides
-    @Singleton
-    fun provideGetLastMediaUseCase(): GetLastMediaUseCase = GetLastMediaUseCase()
+    fun provideContentResolver(@ApplicationContext context: Context): ContentResolver {
+        return context.contentResolver
+    }
 
     @Provides
     @Singleton
-    fun provideGetImagesUseCase(): GetImagesUseCase = GetImagesUseCase()
-
-    @Provides
-    @Singleton
-    fun provideGetVideosUseCase(): GetVideosUseCase = GetVideosUseCase()
-
-    @Provides
-    @Singleton
-    fun provideGetDocumentsUseCase(): GetDocumentsUseCase = GetDocumentsUseCase()
-
-    @Singleton
-    @Provides
-    fun provideGetAudiosUseCase(): GetAudiosUseCase = GetAudiosUseCase()
-
-    @Singleton
-    @Provides
-    fun provideGetDownloadsUseCase(): GetDownloadsUseCase = GetDownloadsUseCase()
-
-    @Singleton
-    @Provides
-    fun provideGetAppsUseCase(): GetAppsUseCase = GetAppsUseCase()
-
+    fun provideFileBrowserRepository(
+        contentResolver: ContentResolver
+    ): FileBrowserRepository =
+        FileBrowserRepository(
+            contentResolver
+        )
 
     @Provides
     @Singleton
     fun provideMediaRepository(
-        getLastMediaUseCase: GetLastMediaUseCase,
-        getImagesUseCase: GetImagesUseCase,
-        getVideosUseCase: GetVideosUseCase,
-        getAudiosUseCase: GetAudiosUseCase,
-        getDownloadsUseCase: GetDownloadsUseCase,
-        getDocumentsUseCase: GetDocumentsUseCase,
-        getAppsUseCase: GetAppsUseCase
-    ): MediaRepository = MediaRepository(
-        getLastMediaUseCase,
-        getImagesUseCase,
-        getVideosUseCase,
-        getAudiosUseCase,
-        getDownloadsUseCase,
-        getDocumentsUseCase,
-        getAppsUseCase
-    )
+        fileBrowserRepository: FileBrowserRepository
+    ): MediaRepository = MediaRepository(fileBrowserRepository)
 }

@@ -1,38 +1,36 @@
-package com.example.filemanager.data.repository.usecases
+package com.example.filemanager.data.storage.strategies
 
 import android.content.ContentUris
-import android.content.Context
+import android.database.Cursor
+import android.net.Uri
 import android.provider.MediaStore
 import com.example.filemanager.data.repository.Ext
 import com.example.filemanager.data.repository.MediaFile
 
-class GetAudiosUseCase {
-    operator fun invoke(context: Context): List<MediaFile> {
+object MediaStoreAudioStrategy : DataSourceStrategy {
+    override val uri: Uri = MediaStore.Audio.Media.getContentUri(
+        MediaStore.VOLUME_EXTERNAL
+    )
+    override val projection: Array<String> = arrayOf(
+        MediaStore.Audio.Media._ID,
+        MediaStore.Audio.Media.DATA,
+        MediaStore.Audio.Media.DISPLAY_NAME,
+        MediaStore.Audio.Media.DURATION,
+        MediaStore.Audio.Media.MIME_TYPE,
+        MediaStore.Audio.Media.DATE_MODIFIED,
+        MediaStore.Audio.Media.SIZE
+    )
+    override val defaultSortOrder: String = "${MediaStore.Audio.Media.DATE_MODIFIED} DESC"
+    override fun selection(): String =
+        "1 = 1"
+
+    override fun selectionArgs(): Array<String>? {
+        return null
+    }
+
+    override suspend fun fetchFiles(query: Cursor): List<MediaFile> {
         val list = mutableListOf<MediaFile>()
-        val collection =
-            MediaStore.Audio.Media.getContentUri(
-                MediaStore.VOLUME_EXTERNAL
-            )
-
-        val projection = arrayOf(
-            MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.DISPLAY_NAME,
-            MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media.MIME_TYPE,
-            MediaStore.Audio.Media.DATE_MODIFIED,
-            MediaStore.Audio.Media.SIZE
-        )
-        val sortOrder = "${MediaStore.Audio.Media.DATE_MODIFIED} DESC"
-
-        val query = context.contentResolver.query(
-            collection,
-            projection,
-            null,
-            null,
-            sortOrder
-        )
-        query?.use { cursor ->
+        query.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
             val pathColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
             val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)
@@ -59,7 +57,6 @@ class GetAudiosUseCase {
 
                 list.add(MediaFile(id, path, date, name, mimeType, duration, contentUri, size))
             }
-            cursor.close()
         }
         return list
     }

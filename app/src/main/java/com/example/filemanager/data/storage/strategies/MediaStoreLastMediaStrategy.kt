@@ -1,21 +1,17 @@
-package com.example.filemanager.data.repository.usecases
+package com.example.filemanager.data.storage.strategies
 
 import android.content.ContentUris
-import android.content.Context
+import android.database.Cursor
+import android.net.Uri
 import android.provider.MediaStore
 import com.example.filemanager.data.repository.Ext
 import com.example.filemanager.data.repository.MediaFile
 
-class GetLastMediaUseCase {
-    suspend operator fun invoke(context: Context): List<MediaFile> {
-        val media = mutableListOf<MediaFile>()
-        val collection =
-            MediaStore.Images.Media.getContentUri(
-                MediaStore.VOLUME_EXTERNAL
-            )
-
-
-        val projection = arrayOf(
+object MediaStoreLastMediaStrategy : DataSourceStrategy {
+    override val uri: Uri
+        get() = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    override val projection: Array<String>
+        get() = arrayOf(
             MediaStore.Images.Media._ID,
             MediaStore.Images.Media.DATA,
             MediaStore.Images.Media.DISPLAY_NAME,
@@ -23,22 +19,20 @@ class GetLastMediaUseCase {
             MediaStore.Images.Media.DATE_MODIFIED,
             MediaStore.Images.Media.SIZE
         )
-        val currentTime = System.currentTimeMillis() / 1000 // Current time in seconds
-        val tenDaysAgo = currentTime - (10 * 24 * 60 * 60) // 10 days ago in seconds
+    val currentTime = System.currentTimeMillis() / 1000 // Current time in seconds
+    val tenDaysAgo = currentTime - (10 * 24 * 60 * 60) // 10 days ago in seconds
 
-        val selection = "${MediaStore.Images.Media.DATE_MODIFIED} > ?"
-        val selectionArgs = arrayOf(tenDaysAgo.toString())
+    override val defaultSortOrder: String
+        get() = "${MediaStore.Images.Media.DATE_MODIFIED} DESC"
 
-        val sortOrder = "${MediaStore.Images.Media.DATE_MODIFIED} DESC"
+    override fun selection(): String = "${MediaStore.Images.Media.DATE_MODIFIED} > ?"
 
-        val query = context.contentResolver.query(
-            collection,
-            projection,
-            selection,
-            selectionArgs,
-            sortOrder
-        )
+    override fun selectionArgs(): Array<String>? {
+        return arrayOf(tenDaysAgo.toString())
+    }
 
+    override suspend fun fetchFiles(query: Cursor): List<MediaFile> {
+        val media = mutableListOf<MediaFile>()
         var counter = 0
         query?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
@@ -68,8 +62,8 @@ class GetLastMediaUseCase {
                     continue
                 }
             }
-            cursor.close()
         }
         return media
     }
+
 }

@@ -9,5 +9,6 @@ enum class MediaType(val value: Int) {
     AUDIOS(R.string.audio),
     DOWNLOADS(R.string.downloads),
     DOCUMENTS(R.string.documents),
-    APPLICATIONS(R.string.applications)
+    APPLICATIONS(R.string.applications),
+    ALL(R.string.show_all)
 }
