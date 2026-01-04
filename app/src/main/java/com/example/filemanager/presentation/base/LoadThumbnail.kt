@@ -2,26 +2,92 @@ package com.example.filemanager.presentation.base
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.os.Build
-import android.provider.MediaStore
 import android.util.Size
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.example.filemanager.R
 import com.example.filemanager.data.repository.MediaFile
+import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
-fun getThumbnail(context: Context, item: MediaFile, size: Size) : Bitmap {
-    val thumbnail: Bitmap? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val bitmap = try {
-            context.contentResolver.loadThumbnail(item.contentUri, size, null)
-        } catch (e: Exception) {
-            ContextCompat.getDrawable(context, R.drawable.placeholder_image)!!.toBitmap()
+fun MediaThumbnail(item: MediaFile, context: Context, size: Size) {
+    var isLoading by remember(item.contentUri) { mutableStateOf(true) }
+
+    val thumbnailState = produceState<Bitmap?>(initialValue = null, item.contentUri) {
+        isLoading = true
+        value = withContext(Dispatchers.IO) {
+            try {
+                context.contentResolver.loadThumbnail(
+                    item.contentUri,
+                    Size(size.width * 2, size.height * 2),
+                    null
+                )
+            } catch (e: Exception) {
+                null
+            }
         }
-        bitmap
-    } else  {
-        MediaStore.Images.Thumbnails.getThumbnail(context.contentResolver, item.id, MediaStore.Images.Thumbnails.MINI_KIND, null)
+        isLoading = false
     }
-    return thumbnail ?: ContextCompat.getDrawable(context, R.drawable.placeholder_image)!!.toBitmap()
+
+    val placeholderRes = when {
+        item.mimeType.contains("pdf") -> R.drawable.document_24
+        item.mimeType.contains("zip") || item.mimeType.contains("rar") -> R.drawable.ic_archive
+        item.mimeType.startsWith("audio") -> R.drawable.ic_music
+        else -> R.drawable.placeholder_image
+    }
+
+    val bitmap = thumbnailState.value
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier.size(size.width.dp, size.height.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+        }
+    } else {
+        ImageRounded(bitmap, size, placeholderRes)
+    }
+}
+
+@Composable
+fun ImageRounded(imageItem: Bitmap?, size: Size, placeholderRes: Int) {
+    GlideImage(
+        imageModel = { imageItem },
+        modifier = Modifier
+            .size(size.width.dp, size.height.dp)
+            .clip(RoundedCornerShape(16.dp)),
+        loading = {
+            Box(Modifier.matchParentSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(strokeWidth = 2.dp)
+            }
+        },
+        failure = {
+            Image(
+                painter = painterResource(placeholderRes),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(size.width.dp, size.height.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
+            )
+        }
+    )
 }

@@ -3,29 +3,31 @@ package com.example.filemanager.presentation
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.IntentSenderRequest
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.example.filemanager.domain.PermsHelper
 import com.example.filemanager.presentation.theme.ui.Dimens
@@ -33,14 +35,10 @@ import com.example.filemanager.presentation.theme.ui.FileManagerTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 @OptIn(ExperimentalPermissionsApi::class)
 class MainActivity : ComponentActivity() {
-
-    private lateinit var intentSenderLauncher: ActivityResultLauncher<IntentSenderRequest>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -48,48 +46,73 @@ class MainActivity : ComponentActivity() {
             FileManagerTheme {
                 val navController = rememberNavController()
 
-                val permissions = remember { PermsHelper.permissions() }
-                val permissionsState = rememberMultiplePermissionsState(
-                    permissions = permissions
-                )
+                // Состояние для обычных разрешений (Фото, Видео)
+                val permissionsState = rememberMultiplePermissionsState(PermsHelper.permissions())
+
+                // Состояние конкретно для MANAGE_EXTERNAL_STORAGE
+                var hasAllFilesAccess by remember { mutableStateOf(isAllFilesAdmin()) }
+
+                // Проверка при возвращении в приложение (например, из настроек)
                 val lifecycleOwner = LocalLifecycleOwner.current
-
-                LaunchedEffect(key1 = lifecycleOwner) {
-                    lifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                            permissionsState.launchMultiplePermissionRequest()
+                DisposableEffect(lifecycleOwner) {
+                    val observer = LifecycleEventObserver { _, event ->
+                        if (event == Lifecycle.Event.ON_RESUME) {
+                            hasAllFilesAccess = isAllFilesAdmin()
                         }
                     }
+                    lifecycleOwner.lifecycle.addObserver(observer)
+                    onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
                 }
 
+                LaunchedEffect(Unit) {
+                    permissionsState.launchMultiplePermissionRequest()
+                }
+
+                // Логика отображения
                 when {
-                    permissionsState.allPermissionsGranted -> {
-                        Box {
-                            Navigation(navController = navController)
-                        }
+                    // Если даны и обычные, и спец. разрешение
+                    permissionsState.allPermissionsGranted && hasAllFilesAccess -> {
+                        Navigation(navController = navController)
                     }
 
+                    // Если обычные даны, но нет доступа ко всем файлам (для документов)
+                    permissionsState.allPermissionsGranted && !hasAllFilesAccess -> {
+                        PermissionAlertDialog(
+                            text = "Для отображения документов нужен доступ ко всем файлам",
+                            onClick = {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                                        data = Uri.parse("package:${packageName}")
+                                    }
+                                    startActivity(intent)
+                                }
+                            }
+                        )
+                    }
+
+                    // Логика для обычных разрешений (твоя прежняя)
                     permissionsState.shouldShowRationale -> {
-                        PermissionAlertDialog(
-                            "Please, accept the permissions",
-                            onClick = { permissionsState.launchMultiplePermissionRequest() }
-                        )
+                        PermissionAlertDialog("Нужны базовые разрешения", onClick = { permissionsState.launchMultiplePermissionRequest() })
                     }
 
-                    !permissionsState.shouldShowRationale && !permissionsState.allPermissionsGranted -> {
-                        PermissionAlertDialog(
-                            "perms are denied permanently",
-                            onClick = { openAppSettings() }
-                        )
-                        //Navigation(navController = navController)
+                    !permissionsState.allPermissionsGranted -> {
+                        PermissionAlertDialog("Разрешения отклонены навсегда", onClick = { openAppSettings() })
                     }
                 }
-
             }
         }
     }
 }
 
+
+
+fun isAllFilesAdmin(): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        Environment.isExternalStorageManager()
+    } else {
+        true // На версиях ниже 11 это разрешение не нужно
+    }
+}
 @Composable
 fun PermissionAlertDialog(text: String, onClick: () -> Unit) {
     Column(

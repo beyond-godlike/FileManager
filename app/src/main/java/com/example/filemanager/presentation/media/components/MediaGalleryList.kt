@@ -1,8 +1,7 @@
 package com.example.filemanager.presentation.media.components
 
 import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
+
 import android.util.Size
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -32,16 +31,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.filemanager.data.repository.MediaFile
-import com.example.filemanager.presentation.base.getThumbnail
-import com.example.filemanager.presentation.media.MediaIntent
-import com.example.filemanager.presentation.media.MediaViewModel
+import com.example.filemanager.presentation.base.MediaThumbnail
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.Typography
 import com.example.filemanager.presentation.utils.open
-import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun MediaGalleryList(
@@ -92,8 +87,6 @@ fun ListItemCard(
     modifier: Modifier = Modifier,
     onDelete: (MediaFile) -> Unit
 ) {
-    val thumbnail = getThumbnail(context, item, Size(100, 100))
-
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -101,7 +94,7 @@ fun ListItemCard(
         verticalAlignment = Alignment.CenterVertically
 
     ) {
-        SmallImage(thumbnail, 48.dp)
+        SmallImage(item, context)
 
         Spacer(modifier = Modifier.width(Dimens.defaultPadding))
         Column(
@@ -129,14 +122,8 @@ fun ListItemCard(
 }
 
 @Composable
-fun SmallImage(bitmap: Bitmap, size: Dp) {
-    GlideImage(
-        imageModel = { bitmap },
-        modifier = Modifier
-            .width(size)
-            .height(size),
-    )
-
+fun SmallImage(item: MediaFile, context: Context) {
+    MediaThumbnail(item, context, Size(48, 48))
 }
 
 @Composable

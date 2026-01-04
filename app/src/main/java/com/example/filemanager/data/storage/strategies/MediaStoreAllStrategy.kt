@@ -15,7 +15,7 @@ object MediaStoreAllStrategy : DataSourceStrategy {
     override val projection: Array<String> = arrayOf(
         FileColumns._ID,
         FileColumns.DISPLAY_NAME,
-        MediaStore.Images.Media.MIME_TYPE,
+        FileColumns.MIME_TYPE,
         FileColumns.MEDIA_TYPE,
         FileColumns.SIZE,
         FileColumns.DATE_MODIFIED,
@@ -29,26 +29,24 @@ object MediaStoreAllStrategy : DataSourceStrategy {
         return null
     }
 
-    override suspend fun fetchFiles(query: Cursor): List<MediaFile> {
+    override suspend fun fetchFiles(cursor: Cursor): List<MediaFile> {
         val files = mutableListOf<MediaFile>()
-        query.use { cursor ->
-            val idColumn = cursor.getColumnIndexOrThrow(FileColumns._ID)
-            val pathColumn = cursor.getColumnIndexOrThrow(FileColumns.RELATIVE_PATH)
-            val nameColumn = cursor.getColumnIndexOrThrow(FileColumns.DISPLAY_NAME)
-            val mimeTypeColumn = cursor.getColumnIndexOrThrow(FileColumns.MIME_TYPE)
-            val dateColumn = cursor.getColumnIndexOrThrow(FileColumns.DATE_MODIFIED)
-            val sizeColumn = cursor.getColumnIndexOrThrow(FileColumns.SIZE)
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idColumn)
-                val path = cursor.getString(pathColumn)
-                val name = cursor.getString(nameColumn)
-                val mimeType = cursor.getString(mimeTypeColumn) ?: "unknown"
-                val duration = 0
-                val date = Ext.longToLocalDate(cursor.getLong(dateColumn))
-                val size = Ext.formatSize(cursor.getLong(sizeColumn))
-                val contentUri = ContentUris.withAppendedId(uri, id)
-                files.add(MediaFile(id, path, date, name, mimeType, duration, contentUri, size))
-            }
+        val idCol = cursor.getColumnIndexOrThrow(FileColumns._ID)
+        val pathCol = cursor.getColumnIndexOrThrow(FileColumns.RELATIVE_PATH)
+        val nameCol = cursor.getColumnIndexOrThrow(FileColumns.DISPLAY_NAME)
+        val mimeTypeCol = cursor.getColumnIndexOrThrow(FileColumns.MIME_TYPE)
+        val dateCol = cursor.getColumnIndexOrThrow(FileColumns.DATE_MODIFIED)
+        val sizeCol = cursor.getColumnIndexOrThrow(FileColumns.SIZE)
+        while (cursor.moveToNext()) {
+            val id = cursor.getLong(idCol)
+            val path = cursor.getString(pathCol)
+            val name = cursor.getString(nameCol)
+            val mimeType = cursor.getString(mimeTypeCol) ?: "unknown"
+            val date = Ext.longToLocalDate(cursor.getLong(dateCol))
+            val size = Ext.formatSize(cursor.getLong(sizeCol))
+            val contentUri = ContentUris.withAppendedId(uri, id)
+
+            files.add(MediaFile(id, path, date, name, mimeType, duration = 0, contentUri, size))
         }
         return files
     }

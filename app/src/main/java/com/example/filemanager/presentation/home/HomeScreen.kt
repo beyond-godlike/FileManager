@@ -2,7 +2,7 @@
 
 package com.example.filemanager.presentation.home
 
-import android.graphics.Bitmap
+import android.content.Context
 import android.util.Size
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -74,12 +74,11 @@ import androidx.navigation.NavController
 import com.example.filemanager.R
 import com.example.filemanager.data.repository.MediaFile
 import com.example.filemanager.presentation.Screen
+import com.example.filemanager.presentation.base.MediaThumbnail
 import com.example.filemanager.presentation.base.NavigationItem
-import com.example.filemanager.presentation.base.getThumbnail
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.ImageSize
 import com.example.filemanager.presentation.theme.ui.Typography
-import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.launch
 
 @Composable
@@ -126,7 +125,6 @@ fun ReadyHomeScreen(
             route = Screen.HomeScreen.route
         )
     )
-
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -232,29 +230,18 @@ fun ReadyHomeScreen(
 }
 
 @Composable
-fun RowImages(images: List<MediaFile>) {
+fun RowImages(images: List<MediaFile>, context: Context) {
     LazyRow {
         items(images) { item ->
-            val thumbnail = getThumbnail(LocalContext.current, item, Size(320, 240))
-            ImageRounded(thumbnail)
+            MediaThumbnail(item, context, Size(120, 150))
             Spacer(modifier = Modifier.width(8.dp))
         }
     }
 }
 
 @Composable
-fun ImageRounded(imageItem: Bitmap) {
-    GlideImage(
-        imageModel = { imageItem },
-        modifier = Modifier
-            .width(100.dp)
-            .height(150.dp)
-            .clip(RoundedCornerShape(16.dp))
-    )
-}
-
-@Composable
 fun MainScreen(navController: NavController, paddings: PaddingValues, images: List<MediaFile>) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier.padding(
             start = paddings.calculateStartPadding(LayoutDirection.Ltr),
@@ -287,7 +274,7 @@ fun MainScreen(navController: NavController, paddings: PaddingValues, images: Li
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        RowImages(images)
+        RowImages(images, context)
 
         Text(
             text = stringResource(R.string.categories),

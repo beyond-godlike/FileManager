@@ -4,23 +4,24 @@ import android.content.ContentUris
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
+import android.provider.MediaStore.Audio.Media
 import com.example.filemanager.data.repository.Ext
 import com.example.filemanager.data.repository.MediaFile
 
 object MediaStoreAudioStrategy : DataSourceStrategy {
-    override val uri: Uri = MediaStore.Audio.Media.getContentUri(
+    override val uri: Uri = Media.getContentUri(
         MediaStore.VOLUME_EXTERNAL
     )
     override val projection: Array<String> = arrayOf(
-        MediaStore.Audio.Media._ID,
-        MediaStore.Audio.Media.DATA,
-        MediaStore.Audio.Media.DISPLAY_NAME,
-        MediaStore.Audio.Media.DURATION,
-        MediaStore.Audio.Media.MIME_TYPE,
-        MediaStore.Audio.Media.DATE_MODIFIED,
-        MediaStore.Audio.Media.SIZE
+        Media._ID,
+        Media.DATA,
+        Media.DISPLAY_NAME,
+        Media.DURATION,
+        Media.MIME_TYPE,
+        Media.DATE_MODIFIED,
+        Media.SIZE
     )
-    override val defaultSortOrder: String = "${MediaStore.Audio.Media.DATE_MODIFIED} DESC"
+    override val defaultSortOrder: String = "${Media.DATE_MODIFIED} DESC"
     override fun selection(): String =
         "1 = 1"
 
@@ -28,35 +29,30 @@ object MediaStoreAudioStrategy : DataSourceStrategy {
         return null
     }
 
-    override suspend fun fetchFiles(query: Cursor): List<MediaFile> {
+    override suspend fun fetchFiles(cursor: Cursor): List<MediaFile> {
         val list = mutableListOf<MediaFile>()
-        query.use { cursor ->
-            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
-            val pathColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
-            val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)
-            val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
-            val mimeTypeColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE)
-            val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
-            val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
+        val idCol = cursor.getColumnIndexOrThrow(Media._ID)
+        val pathCol = cursor.getColumnIndexOrThrow(Media.DATA)
+        val nameCol = cursor.getColumnIndexOrThrow(Media.DISPLAY_NAME)
+        val durationCol = cursor.getColumnIndexOrThrow(Media.DURATION)
+        val mimeTypeCol = cursor.getColumnIndexOrThrow(Media.MIME_TYPE)
+        val dateCol = cursor.getColumnIndexOrThrow(Media.DATE_MODIFIED)
+        val sizeCol = cursor.getColumnIndexOrThrow(Media.SIZE)
 
+        while (cursor.moveToNext()) {
+            val id = cursor.getLong(idCol)
+            val path = cursor.getString(pathCol)
+            val date = Ext.longToLocalDate(cursor.getLong(dateCol))
+            val name = cursor.getString(nameCol)
+            val mimeType = cursor.getString(mimeTypeCol)
+            val duration = cursor.getInt(durationCol)
+            val contentUri = ContentUris.withAppendedId(
+                Media.EXTERNAL_CONTENT_URI,
+                id
+            )
+            val size = Ext.formatSize(cursor.getLong(sizeCol))
 
-
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idColumn)
-                val path = cursor.getString(pathColumn)
-                val date = Ext.longToLocalDate(cursor.getLong(dateColumn))
-                val name = cursor.getString(nameColumn)
-                val mimeType = cursor.getString(mimeTypeColumn)
-                val duration = cursor.getInt(durationColumn)
-                val contentUri = ContentUris.withAppendedId(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    id
-                )
-
-                val size = Ext.formatSize(cursor.getLong(sizeColumn))
-
-                list.add(MediaFile(id, path, date, name, mimeType, duration, contentUri, size))
-            }
+            list.add(MediaFile(id, path, date, name, mimeType, duration, contentUri, size))
         }
         return list
     }

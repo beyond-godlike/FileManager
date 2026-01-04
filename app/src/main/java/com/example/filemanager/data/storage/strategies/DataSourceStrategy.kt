@@ -11,5 +11,5 @@ interface DataSourceStrategy {
 
     fun selection(): String
     fun selectionArgs(): Array<String>?
-    suspend fun fetchFiles(query: Cursor): List<MediaFile>
+    suspend fun fetchFiles(cursor: Cursor): List<MediaFile>
 }

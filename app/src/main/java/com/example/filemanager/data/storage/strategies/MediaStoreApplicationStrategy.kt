@@ -18,7 +18,7 @@ object MediaStoreApplicationStrategy : DataSourceStrategy {
         TODO("Not yet implemented")
     }
 
-    override suspend fun fetchFiles(query: Cursor): List<MediaFile> {
+    override suspend fun fetchFiles(cursor: Cursor): List<MediaFile> {
         TODO("Not yet implemented")
     }
 }
