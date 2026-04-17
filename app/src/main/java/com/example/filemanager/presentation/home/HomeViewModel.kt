@@ -6,6 +6,7 @@ import com.example.filemanager.data.MediaType
 import com.example.filemanager.data.repository.MediaRepository
 import com.example.filemanager.presentation.media.MediaState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +26,10 @@ class HomeViewModel @Inject constructor(val repository: MediaRepository) : ViewM
                     _state.update { it.copy(isLoading = true) }
                     try {
                         val images = repository.loadMedia(MediaType.LAST_MEDIA)
-                        _state.update { it.copy(media = images, isLoading = false) }
+                        _state.update { it.copy(
+                            media = images.toPersistentList(),
+                            isLoading = false
+                        ) }
                     } catch (e: Exception) {
                         _state.update { it.copy(error = e.message, isLoading = false) }
                     }

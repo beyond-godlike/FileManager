@@ -1,16 +1,12 @@
 package com.example.filemanager.presentation.media.components
 
-import android.content.Context
-
 import android.util.Size
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,42 +33,43 @@ import com.example.filemanager.presentation.base.MediaThumbnail
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.Typography
 import com.example.filemanager.presentation.utils.open
+import kotlinx.collections.immutable.PersistentList
 
 @Composable
 fun MediaGalleryList(
-    media: List<MediaFile>,
+    media: PersistentList<MediaFile>,
     paddings: PaddingValues,
     onDelete: (MediaFile) -> Unit
 ) {
-    val ims = media.groupBy { it.date }
-    val context = LocalContext.current
+    val grouped = remember(media) {
+        media.groupBy { it.date }.toList()
+    }
 
     LazyColumn(
-        modifier = Modifier
-            .padding(
-                top = paddings.calculateTopPadding(),
-                start = Dimens.defaultPadding,
-                end = Dimens.defaultPadding,
-            )
+        modifier = Modifier.padding(
+            top = paddings.calculateTopPadding(),
+            start = Dimens.defaultPadding,
+            end = Dimens.defaultPadding,
+        )
     ) {
-        items(ims.entries.toList()) { entry ->
-            val date = entry.key
-            val imagesForDate = entry.value
+        items(
+            items = grouped,
+            key = { it.first }
+        ) { (date, imagesForDate) ->
+
             Text(
                 text = date.toString(),
                 style = Typography.labelMedium,
-                modifier = Modifier.padding(top = Dimens.smallPadding, bottom = Dimens.smallPadding)
+                modifier = Modifier.padding(
+                    top = Dimens.smallPadding,
+                    bottom = Dimens.smallPadding
+                )
             )
-            val h = (imagesForDate.size.dp * 64) + 32.dp
-            LazyColumn(
-                modifier = Modifier.height(h)
-            ) {
-                items(imagesForDate) { item ->
+            Column {
+                imagesForDate.forEach { item ->
                     ListItemCard(
-                        item,
-                        context,
-                        modifier = Modifier,
-                        onDelete
+                        item = item,
+                        onDelete = onDelete
                     )
                 }
             }
@@ -83,20 +80,22 @@ fun MediaGalleryList(
 @Composable
 fun ListItemCard(
     item: MediaFile,
-    context: Context,
     modifier: Modifier = Modifier,
     onDelete: (MediaFile) -> Unit
 ) {
+    val context = LocalContext.current
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(Dimens.smallPadding),
         verticalAlignment = Alignment.CenterVertically
-
     ) {
-        SmallImage(item, context)
+
+        SmallImage(item)
 
         Spacer(modifier = Modifier.width(Dimens.defaultPadding))
+
         Column(
             modifier = Modifier.clickable {
                 item.contentUri.open(context, item.mimeType)
@@ -106,34 +105,38 @@ fun ListItemCard(
                 text = item.name,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxSize(0.8f)
+                modifier = Modifier.fillMaxWidth(0.8f)
             )
-            Text(
-                text = item.size
-            )
+            Text(text = item.size)
         }
+
         Spacer(modifier = Modifier.weight(1f))
+
         OptionsMenu(
-            onDelete = {
-                onDelete(item)
-            }
+            onDelete = { onDelete(item) }
         )
     }
 }
 
 @Composable
-fun SmallImage(item: MediaFile, context: Context) {
-    MediaThumbnail(item, context, Size(48, 48))
+fun SmallImage(item: MediaFile) {
+    val size = remember { Size(48, 48) }
+    val context = LocalContext.current
+
+    MediaThumbnail(item, context, size)
 }
 
 @Composable
 fun OptionsMenu(onDelete: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(
+        modifier = Modifier.padding(16.dp)
+    ) {
         IconButton(onClick = { expanded = true }) {
             Icon(Icons.Default.MoreVert, contentDescription = "More options")
         }
+
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
@@ -141,7 +144,6 @@ fun OptionsMenu(onDelete: () -> Unit) {
             DropdownMenuItem(
                 text = { Text("Select") },
                 onClick = {
-                    // Handle Option 1 click
                     expanded = false
                 }
             )

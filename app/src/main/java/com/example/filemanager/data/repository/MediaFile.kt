@@ -1,8 +1,10 @@
 package com.example.filemanager.data.repository
 
 import android.net.Uri
+import androidx.compose.runtime.Immutable
 import kotlinx.datetime.LocalDate
 
+@Immutable
 data class MediaFile (
     val id: Long,
     val path: String,

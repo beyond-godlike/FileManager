@@ -1,8 +1,10 @@
 package com.example.filemanager.presentation.home
 
+import androidx.compose.runtime.Immutable
 import com.example.filemanager.R
 import com.example.filemanager.data.MediaType
 
+@Immutable
 data class CategoryItem(
     val icon: Int,
     val title: Int,

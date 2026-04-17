@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.filemanager.data.repository.MediaFile
 import com.example.filemanager.data.repository.MediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,10 +21,6 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-object GlobalLeakStore {
-    val leaks = mutableListOf<Any>()
-}
 
 @HiltViewModel
 class MediaViewModel @Inject constructor(val repository: MediaRepository) : ViewModel() {
@@ -40,10 +37,6 @@ class MediaViewModel @Inject constructor(val repository: MediaRepository) : View
     private var currentFileToDeleteUri: Uri? = null
     private var currentFileToDeleteName: String? = null
 
-    init {
-        // Гарантированная утечка
-        GlobalLeakStore.leaks.add(this)
-    }
 
     private fun updateState(transform: (MediaState) -> MediaState) {
         _state.update(transform)
@@ -62,7 +55,7 @@ class MediaViewModel @Inject constructor(val repository: MediaRepository) : View
         when (intent) {
             is MediaIntent.LoadMedia -> viewModelScope.launch {
                 repository.loadMedia(intent.type).let { media ->
-                    _state.update { it.copy(media = media, isLoading = false) }
+                    _state.update { it.copy(media = media.toPersistentList(), isLoading = false) }
                 }
             }
             is MediaIntent.DeleteFile -> deleteFile(context, intent.file)

@@ -2,7 +2,6 @@
 
 package com.example.filemanager.presentation.home
 
-import android.content.Context
 import android.util.Size
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +54,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -79,6 +79,7 @@ import com.example.filemanager.presentation.base.NavigationItem
 import com.example.filemanager.presentation.theme.ui.Dimens
 import com.example.filemanager.presentation.theme.ui.ImageSize
 import com.example.filemanager.presentation.theme.ui.Typography
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.launch
 
 @Composable
@@ -95,36 +96,39 @@ fun HomeScreen(navController: NavController) {
 
 @Composable
 fun ReadyHomeScreen(
-    images: List<MediaFile>,
+    images: PersistentList<MediaFile>,
     navController: NavController,
     viewModel: HomeViewModel
 ) {
-    val items = listOf(
-        NavigationItem(
-            title = stringResource(R.string.clean),
-            selectedIcon = Icons.Filled.Home,
-            unselectedIcon = Icons.Outlined.Star,
-            route = Screen.MediaScreen.route
-        ),
-        NavigationItem(
-            title = stringResource(R.string.trash),
-            selectedIcon = Icons.Filled.Settings,
-            unselectedIcon = Icons.Outlined.Delete,
-            route = Screen.HomeScreen.route
-        ),
-        NavigationItem(
-            title = stringResource(R.string.settings),
-            selectedIcon = Icons.Filled.Settings,
-            unselectedIcon = Icons.Outlined.Settings,
-            route = Screen.HomeScreen.route
-        ),
-        NavigationItem(
-            title = stringResource(R.string.help),
-            selectedIcon = Icons.Filled.Settings,
-            unselectedIcon = Icons.Outlined.Info,
-            route = Screen.HomeScreen.route
+
+    val items = remember {
+        listOf(
+            NavigationItem(
+                R.string.clean,
+                Icons.Filled.Home,
+                Icons.Outlined.Star,
+                Screen.MediaScreen.route
+            ),
+            NavigationItem(
+                R.string.trash,
+                Icons.Filled.Settings,
+                Icons.Outlined.Delete,
+                Screen.HomeScreen.route
+            ),
+            NavigationItem(
+                R.string.settings,
+                Icons.Filled.Settings,
+                Icons.Outlined.Settings,
+                Screen.HomeScreen.route
+            ),
+            NavigationItem(
+                R.string.help,
+                Icons.Filled.Settings,
+                Icons.Outlined.Info,
+                Screen.HomeScreen.route
+            )
         )
-    )
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -145,7 +149,7 @@ fun ReadyHomeScreen(
                     items.forEachIndexed { index, item ->
                         NavigationDrawerItem(
                             label = {
-                                Text(text = item.title)
+                                Text(text = stringResource(item.titleRes))
                             },
                             selected = index == selectedItemIndex,
                             onClick = {
@@ -160,7 +164,7 @@ fun ReadyHomeScreen(
                                     imageVector = if (index == selectedItemIndex) {
                                         item.selectedIcon
                                     } else item.unselectedIcon,
-                                    contentDescription = item.title
+                                    contentDescription = stringResource(item.titleRes)
                                 )
                             },
                             badge = {
@@ -230,18 +234,24 @@ fun ReadyHomeScreen(
 }
 
 @Composable
-fun RowImages(images: List<MediaFile>, context: Context) {
+fun RowImages(images: PersistentList<MediaFile>) {
     LazyRow {
-        items(images) { item ->
-            MediaThumbnail(item, context, Size(120, 150))
+        items(
+            items = images,
+            key = { it.id }
+        ) { item ->
+            MediaThumbnail(item, LocalContext.current, Size(120, 150))
             Spacer(modifier = Modifier.width(8.dp))
         }
     }
 }
 
 @Composable
-fun MainScreen(navController: NavController, paddings: PaddingValues, images: List<MediaFile>) {
-    val context = LocalContext.current
+fun MainScreen(
+    navController: NavController,
+    paddings: PaddingValues,
+    images: PersistentList<MediaFile>
+) {
     Column(
         modifier = Modifier.padding(
             start = paddings.calculateStartPadding(LayoutDirection.Ltr),
@@ -274,7 +284,7 @@ fun MainScreen(navController: NavController, paddings: PaddingValues, images: Li
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        RowImages(images, context)
+        RowImages(images)
 
         Text(
             text = stringResource(R.string.categories),
