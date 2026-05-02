@@ -34,7 +34,8 @@ fun MediaGalleryGrid(
     paddings: PaddingValues
 ) {
     val grouped = remember(media) {
-        media.groupBy { it.date }.toList()
+        media.groupBy { it.date.toString() }
+            .toList()
     }
 
     LazyColumn(
@@ -50,7 +51,7 @@ fun MediaGalleryGrid(
         ) { (date, imagesForDate) ->
 
             Text(
-                text = date.toString(),
+                text = date,
                 style = Typography.labelMedium,
                 modifier = Modifier.padding(
                     top = Dimens.defaultPadding,

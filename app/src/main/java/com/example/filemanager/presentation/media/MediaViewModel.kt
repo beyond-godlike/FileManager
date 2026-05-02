@@ -5,8 +5,6 @@ import android.net.Uri
 import android.provider.MediaStore
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.filemanager.data.repository.MediaFile
@@ -27,8 +25,8 @@ class MediaViewModel @Inject constructor(val repository: MediaRepository) : View
     private val _state = MutableStateFlow(MediaState())
     val state: StateFlow<MediaState> = _state.asStateFlow()
 
-    private val _isGridLayout = mutableStateOf(true)
-    val isGridLayout: State<Boolean> = _isGridLayout
+    private val _isGridLayout = MutableStateFlow(true)
+    val isGridLayout: StateFlow<Boolean> = _isGridLayout
 
     private val _effect = Channel<MediaFileEffect>(Channel.BUFFERED)
     val effect = _effect.consumeAsFlow()

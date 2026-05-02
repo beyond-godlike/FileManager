@@ -42,7 +42,8 @@ fun MediaGalleryList(
     onDelete: (MediaFile) -> Unit
 ) {
     val grouped = remember(media) {
-        media.groupBy { it.date }.toList()
+        media.groupBy { it.date.toString() }
+            .toList()
     }
 
     LazyColumn(
@@ -54,11 +55,11 @@ fun MediaGalleryList(
     ) {
         items(
             items = grouped,
-            key = { it.first }
+            key = { it.first}
         ) { (date, imagesForDate) ->
 
             Text(
-                text = date.toString(),
+                text = date,
                 style = Typography.labelMedium,
                 modifier = Modifier.padding(
                     top = Dimens.smallPadding,

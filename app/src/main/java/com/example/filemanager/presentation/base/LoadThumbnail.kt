@@ -50,6 +50,7 @@ fun MediaThumbnail(item: MediaFile, context: Context, size: Size) {
         item.mimeType.contains("pdf") -> R.drawable.document_24
         item.mimeType.contains("zip") || item.mimeType.contains("rar") -> R.drawable.ic_archive
         item.mimeType.startsWith("audio") -> R.drawable.ic_music
+        item.mimeType.contains("apk") -> R.drawable.apps_24
         else -> R.drawable.placeholder_image
     }
 
